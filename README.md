@@ -1,7 +1,5 @@
 # Speedview-Mobile
 
-# **SpeedView**
-
 Setiap balapan **Formula 1** bukan hanya tentang *20 mobil yang berputar di suatu lintasan*.  
 Tapi ini tentang kombinasi **pembalap yang memacu batasan**, **tim pemenang adalah tim yang bermain strategi**, dan detail kecil seperti **cuaca** atau **timing pit stop** yang bisa menentukan hasil akhir.
 
@@ -14,17 +12,6 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
 - Menganalisis performa lewat **lap times, pengaruh cuaca, dan pit strategies**
 - Mempelajari sisi **teknis dari olahraga ini** (*cars, teams, telemetry*)
 
-
-## Deployment
-<p align="center">
-    <img src="static/image/docs/Banner.png" alt="SpeedView Live" width="600"/>
-    <a href="https://helven-marcia-speedview.pbp.cs.ui.ac.id" target="_blank">
-        <br/>
-        <b>SpeedView</b>
-        <br/>
-    </a>
-    <sub>Hosted on Pacil Web Service</sub>
-</p>
 
 ## Contributor
 <table>
@@ -149,47 +136,6 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
   <a href="https://www.formula1.com"><img src="https://img.shields.io/badge/Data-formula1-red?style=flat-square&logo=f1&logoColor=white" alt="Formula 1"/></a>
 </p>
 
-
-## Getting Started
-
-### 1. Clone this repo
-```bash
-git clone https://github.com/Formula-404/SpeedView.git
-cd SpeedView
-```
-
-### 2. Create a virtual environment
-**Windows (PowerShell)**
-```powershell
-python -m venv env
-.venv\Scripts\Activate
-```
-**macOS / Linux (bash/zsh)**
-```bash
-python3 -m venv env
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure environment variables
-create a file named .env in the project root and paste this
-```dotenv
-PRODUCTION=False
-```
-
-### 5. Apply database migrations
-```bash
-python manage.py migrate
-```
-
-### 6. Run the development server
-```bash
-python manage.py runserver
-```
 
 ## Others
 <p align="left">
