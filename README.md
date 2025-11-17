@@ -128,7 +128,61 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
 - Memiliki **alat dan izin manajemen tambahan**
 
 
+## Penjelasan Alur Integrasi
+### Ringkasan Arsitektur
+- **Aplikasi web**: Django yang sudah memiliki modul user, driver, car, meeting, dsb lengkap dengan view JSON hasil PTS.
+- **Aplikasi mobile**: Flutter dengan Material 3 dan state management ringan menggunakan `Provider`.
+- **Hubungan web dan mobile**: Menggunakan `CookieRequest` dari package `pbp_django_auth` sehingga app mobile dapat menjalankan login, menyertakan cookie session, dan mengirim/menarik data JSON. Flutter cukup memanggil endpoint Django yang sudah ada.
 
+### Alur Pengintegrasian dengan Web Service
+
+#### 1. Menyediakan Representasi Data di Django
+1. Memastikan setiap modul yang ingin ditampilkan di Flutter memiliki endpoint JSON berformat konsisten (contoh: `/car/json/`, `/car/json/<id>/`, `/meeting/json/`). Endpoint ini berupa view fungsi yang melakukan `serializers.serialize` atau `values()` kemudian dibungkus oleh `JsonResponse`.
+2. Membuat view baru yang menerima request `POST` berisi JSON dan mengembalikan status sukses/gagal.
+3. Peran (guest, login user, admin) tetap dikontrol oleh Django melalui session sehingga tidak ada perubahan besar di sisi backend.
+
+#### 2. Membawa Definisi Model ke Flutter
+1. Dari struktur JSON yang dikirim web service, turunkan kelas model di Flutter. Misal modul Car:
+   ```dart
+   class Car {
+     Car({
+       required this.id,
+       required this.model,
+       required this.brand,
+       required this.color,
+       this.releaseDate,
+     });
+
+     factory Car.fromJson(Map<String, dynamic> json) => Car(
+           id: json['id'],
+           model: json['model'],
+           brand: json['brand'],
+           color: json['color'],
+           releaseDate: json['release_date'] != null
+               ? DateTime.parse(json['release_date'])
+               : null,
+         );
+   }
+   ```
+2. Membuat fungsi (con: `carFromJson`/`carToJson`) yang digunakan untuk mengonversi antara string JSON dan objek Dart. Penyesuaian hanya berupa nama field agar cocok dengan model SpeedView.
+
+#### 3. Menyiapkan Jalur Komunikasi di Flutter
+1. Menambahkan dependency `pbp_django_auth`, `http`, dan `provider` pada `pubspec.yaml`.
+2. Wrap aplikasi dengan `Provider` yang menampung `CookieRequest`.
+3. Menambahkan beberapa halaman sehingga `CookieRequest` biasanya diteruskan melalui `Consumer<CookieRequest>` atau `context.watch<CookieRequest>()` pada setiap screen agar akses session konsisten.
+
+#### 4. Alur Komunikasi Data
+1. **Login**: halaman login Flutter memanggil `request.login('http://HOST/auth/login/', {...})`. Jika sukses, backend mengirim status beserta atribut user (username, role) sehingga aplikasi mobile mengetahui hak akses pengguna sama seperti di web.
+2. **Fetch data**: halaman list/detail melakukan `request.get('http://HOST/<module>/json/')`, mengubah respons ke model Dart, lalu ditampilkan dengan `FutureBuilder`. Karena menggunakan session, endpoint yang memerlukan login (misal modul comparison) otomatis mengenali pengguna.
+3. **Kirim data (form)**: ketika user membuat data baru (contoh: menambah catatan comparison), Flutter memanggil `request.postJson('http://HOST/<module>/create-flutter/', jsonEncode({...}))`. View Django menvalidasi data, membuat objek baru, dan mengembalikan `{'status': 'success'}`. Flutter menampilkan SnackBar lalu memicu refresh daftar.
+4. **Logout**: `request.logout('http://HOST/auth/logout/')` dipanggil dari menu profil. Django menghapus session, dan aplikasi mobile kembali ke halaman login.
+
+#### 5. Sinkronisasi Hak Akses dan State
+1. Setelah login, informasi role (guest/login/admin) diterima dari Django dan disimpan pada state Flutter (misal `UserProvider`). Hal ini memastikan fitur-fitur yang hanya boleh diakses admin di web juga dibatasi di mobile.
+2. Setiap operasi tulis/ubah selalu melakukan validasi ganda: validator pada form Flutter dan pemeriksaan `request.user` di view Django, sama seperti pada aplikasi web.
+3. Bila data diperbarui di salah satu platform, cukup panggil ulang endpoint JSON agar Flutter menampilkan kondisi terkini; tidak ada mekanisme khusus selain refresh karena sumber data sama.
+
+   
 ## Initial Dataset Source Credit
 <p align="left">
   <a href="https://openf1.org"><img src="https://img.shields.io/badge/Data-OpenF1-red?style=flat-square&logo=fastapi&logoColor=white" alt="OpenF1"/></a>
