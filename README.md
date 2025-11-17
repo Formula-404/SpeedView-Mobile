@@ -193,7 +193,7 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
 
 ## Others
 <p align="left">
-    <a href="https://www.figma.com/files/team/1555462377026209078/project/463049743/SpeedView?fuid=1485588854028450044">
+    <a href="[https://www.figma.com/files/team/1555462377026209078/project/463049743/SpeedView?fuid=1485588854028450044](https://www.figma.com/design/hJGXw1ko660dWMX8qjTOzV/SpeedView---Mobile?node-id=0-1&t=pvMdnddRAOoeEgRg-1)">
         <img src="https://img.shields.io/badge/Figma-Design%20Mockups-purple?style=for-the-badge&logo=figma&logoColor=white" alt="Figma Project"/>
     </a>
 </p>
