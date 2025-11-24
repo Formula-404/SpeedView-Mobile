@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/screens/coming_soon_screen.dart';
 import 'package:speedview/home/screens/home_screen.dart';
+import 'package:speedview/user/screens/login.dart';
 
 import 'meeting/meeting_service.dart';
 import 'meeting/screens/meeting_list_screen.dart';
@@ -15,7 +18,7 @@ class SpeedViewApp extends StatelessWidget {
   const SpeedViewApp({
     super.key,
     this.service,
-    this.initialRoute = AppRoutes.home,
+    this.initialRoute = AppRoutes.login,
   });
 
   final MeetingService? service;
@@ -38,7 +41,7 @@ class SpeedViewApp extends StatelessWidget {
         .map((destination) => destination.route)
         .toSet();
 
-    return MaterialApp(
+    final app = MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SpeedView Mobile',
       theme: ThemeData(
@@ -71,6 +74,7 @@ class SpeedViewApp extends StatelessWidget {
       ),
       initialRoute: initialRoute,
       routes: {
+        AppRoutes.login: (_) => const LoginPage(),
         AppRoutes.home: (_) => const HomeScreen(),
         AppRoutes.meetings: (_) => MeetingListScreen(service: service),
       },
@@ -86,6 +90,11 @@ class SpeedViewApp extends StatelessWidget {
         }
         return null;
       },
+    );
+
+    return Provider<CookieRequest>(
+      create: (_) => CookieRequest(),
+      child: app,
     );
   }
 }
