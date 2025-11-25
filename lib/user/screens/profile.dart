@@ -129,14 +129,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: _role == 'admin' 
-                                ? Colors.red.withOpacity(0.2) 
-                                : Colors.blue.withOpacity(0.2),
+                            color: _role == 'admin'
+                                ? Colors.red.withValues(alpha: 0.2)
+                                : Colors.blue.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: _role == 'admin' 
-                                  ? Colors.red.withOpacity(0.5) 
-                                  : Colors.blue.withOpacity(0.5),
+                              color: _role == 'admin'
+                                  ? Colors.red.withValues(alpha: 0.5)
+                                  : Colors.blue.withValues(alpha: 0.5),
                             ),
                           ),
                           child: Text(

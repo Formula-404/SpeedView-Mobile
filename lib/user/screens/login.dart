@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:speedview/user/screens/register.dart';
+import 'package:speedview/home/screens/home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -64,9 +65,16 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 32.0),
                     TextField(
                       controller: _usernameController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Username',
                         hintText: 'Enter your username',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),
@@ -82,9 +90,16 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20.0),
                     TextField(
                       controller: _passwordController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Password',
                         hintText: 'Enter your password',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),
@@ -114,11 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                           String message = response['message'];
                           String uname = response['username'];
                           if (context.mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const MyHomePage()),
-                            );
+                            Navigator.pushReplacementNamed(context, '/');
                             ScaffoldMessenger.of(context)
                               ..hideCurrentSnackBar()
                               ..showSnackBar(
