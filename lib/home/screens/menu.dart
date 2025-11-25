@@ -4,6 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:speedview/user/screens/profile.dart';
 import 'package:speedview/user/screens/login.dart';
 
+// import buat driver
+import 'package:speedview/driver/screens/driver_list_page.dart';
+
+
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
@@ -38,6 +42,34 @@ class MyHomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
+
+            // tombol buat driver
+            SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DriverListPage(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0D1117),
+                  foregroundColor: const Color(0xFFE6EDF3),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: Colors.white24),
+                  ),
+                ),
+                child: const Text('Drivers'),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // tombol profile
             SizedBox(
               width: 200,
               child: ElevatedButton(
@@ -60,6 +92,8 @@ class MyHomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+
+            // tombol logout
             SizedBox(
               width: 200,
               child: ElevatedButton(
