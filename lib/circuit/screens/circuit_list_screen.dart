@@ -151,59 +151,49 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
                 children: [
                   Row(
                     children: [
+                      // Back
                       InkWell(
                         onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.home),
-                        child: Text(
-                          'Home',
-                          style: TextStyle(color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w500),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          ),
+                          child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Icon(Icons.chevron_right, size: 16, color: Colors.white.withOpacity(0.6)),
-                      ),
-                      const Text(
-                        'Circuits',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      const SizedBox(width: 12),
+                      // Search Bar
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: cardColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            style: const TextStyle(color: Colors.white),
+                            onChanged: _filterCircuits,
+                            decoration: InputDecoration(
+                              hintText: 'Search circuit...',
+                              hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                              prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.4)),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'CIRCUITS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Search Bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      onChanged: _filterCircuits,
-                      decoration: InputDecoration(
-                        hintText: 'Search circuit...',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-                        prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.4)),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      ),
-                    ),
                   ),
                 ],
               ),
             ),
-
             // Content
             Expanded(
               child: _isLoading
