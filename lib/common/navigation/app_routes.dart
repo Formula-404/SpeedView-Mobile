@@ -68,6 +68,7 @@ class AppRoutes {
       title: 'Cars',
       icon: Icons.car_rental_outlined,
       description: 'Technical breakdown',
+      implemented: true,
     ),
     DrawerDestination(
       route: circuits,

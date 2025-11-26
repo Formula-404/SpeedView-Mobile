@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 
-import 'models/meeting.dart';
+import 'package:speedview/common/constants.dart';
 
-const String speedViewBaseUrl = String.fromEnvironment(
-  'SPEEDVIEW_BASE_URL',
-  defaultValue: 'https://helven-marcia-speedview.pbp.cs.ui.ac.id',
-);
+import 'models/meeting.dart';
 
 const Duration _networkTimeout = Duration(seconds: 12);
 

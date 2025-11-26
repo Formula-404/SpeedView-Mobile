@@ -1,8 +1,9 @@
-import 'package:speedview/home/screens/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:speedview/common/constants.dart';
 import 'package:speedview/user/screens/register.dart';
+import 'package:speedview/common/navigation/app_routes.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -104,8 +105,8 @@ class _LoginPageState extends State<LoginPage> {
                         String username = _usernameController.text;
                         String password = _passwordController.text;
 
-                        final response =
-                            await request.login("http://127.0.0.1:8000/login-flutter/", {
+                        final response = await request.login(
+                            buildSpeedViewUrl('/login-flutter/'), {
                           'username': username,
                           'password': password,
                         });
@@ -114,10 +115,9 @@ class _LoginPageState extends State<LoginPage> {
                           String message = response['message'];
                           String uname = response['username'];
                           if (context.mounted) {
-                            Navigator.pushReplacement(
+                            Navigator.pushReplacementNamed(
                               context,
-                              MaterialPageRoute(
-                                  builder: (context) => const MyHomePage()),
+                              AppRoutes.home,
                             );
                             ScaffoldMessenger.of(context)
                               ..hideCurrentSnackBar()

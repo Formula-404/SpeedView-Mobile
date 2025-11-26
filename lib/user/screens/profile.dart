@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:speedview/common/constants.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -26,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _fetchProfile() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.get("http://127.0.0.1:8000/profile-flutter/");
+      final response = await request.get(buildSpeedViewUrl('/profile-flutter/'));
       if (response['status'] == true) {
         setState(() {
           _usernameController.text = response['username'];
@@ -203,7 +204,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ElevatedButton(
                       onPressed: () async {
                         final response = await request.postJson(
-                          "http://127.0.0.1:8000/edit-profile-flutter/",
+                          buildSpeedViewUrl('/edit-profile-flutter/'),
                           jsonEncode({
                             'username': _usernameController.text,
                             'email': _emailController.text,

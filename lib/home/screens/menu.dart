@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:speedview/common/constants.dart';
 import 'package:speedview/user/screens/profile.dart';
 import 'package:speedview/user/screens/login.dart';
 
@@ -64,8 +65,8 @@ class MyHomePage extends StatelessWidget {
               width: 200,
               child: ElevatedButton(
                 onPressed: () async {
-                  final response = await request.logout(
-                      "http://127.0.0.1:8000/logout-flutter/");
+                  final response =
+                      await request.logout(buildSpeedViewUrl('/logout-flutter/'));
                   String message = response["message"];
                   if (context.mounted) {
                     if (response['status']) {

@@ -7,6 +7,7 @@ import 'package:speedview/common/screens/coming_soon_screen.dart';
 import 'package:speedview/home/screens/home_screen.dart';
 import 'package:speedview/user/screens/login.dart';
 
+import 'car/screens/car_list_screen.dart';
 import 'meeting/meeting_service.dart';
 import 'meeting/screens/meeting_list_screen.dart';
 
@@ -77,6 +78,7 @@ class SpeedViewApp extends StatelessWidget {
         AppRoutes.login: (_) => const LoginPage(),
         AppRoutes.home: (_) => const HomeScreen(),
         AppRoutes.meetings: (_) => MeetingListScreen(service: service),
+        AppRoutes.cars: (_) => const CarListScreen(),
       },
       onGenerateRoute: (settings) {
         if (placeholderRoutes.contains(settings.name)) {
