@@ -9,7 +9,8 @@ import 'package:speedview/user/screens/login.dart';
 
 import 'meeting/meeting_service.dart';
 import 'meeting/screens/meeting_list_screen.dart';
-import  'session/screens/session_list_screen.dart';
+import 'session/screens/session_list_screen.dart';
+import 'circuit/screens/circuit_list_screen.dart';
 
 void main() {
   runApp(const SpeedViewApp());
@@ -79,6 +80,7 @@ class SpeedViewApp extends StatelessWidget {
         AppRoutes.home: (_) => const HomeScreen(),
         AppRoutes.meetings: (_) => MeetingListScreen(service: service),
         AppRoutes.sessions: (context) => const SessionListScreen(),
+        AppRoutes.circuits: (context) => const CircuitListScreen(),
       },
       onGenerateRoute: (settings) {
         if (placeholderRoutes.contains(settings.name)) {
