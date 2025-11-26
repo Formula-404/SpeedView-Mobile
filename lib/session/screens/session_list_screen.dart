@@ -88,7 +88,6 @@ class _SessionListScreenState extends State<SessionListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // HEADER 
             Container(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -96,65 +95,50 @@ class _SessionListScreenState extends State<SessionListScreen> {
                 children: [
                   Row(
                     children: [
+                      // Back
                       InkWell(
                         onTap: () {
                           Navigator.pushReplacementNamed(context, AppRoutes.home);
                         },
-                        child: Text(
-                          'Home',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: .6),
-                            fontWeight: FontWeight.w500,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                          ),
+                          child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                        ),
+                      ),
+                      
+                      const SizedBox(width: 12),
+
+                      // Search Bar
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: cardColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: 'Search session...',
+                              hintStyle: TextStyle(color: Colors.white.withValues(alpha: .3)),
+                              prefixIcon: Icon(Icons.search, color: Colors.white.withValues(alpha: .4)),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            ),
+                            onSubmitted: (value) => _fetchSessions(page: 1, query: value),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Icon(Icons.chevron_right, size: 16, color: Colors.white.withValues(alpha: .6)),
-                      ),
-                      const Text(
-                        'Sessions',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Title
-                  const Text(
-                    'SESSIONS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Search Bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withValues(alpha: .1)),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Search session',
-                        hintStyle: TextStyle(color: Colors.white.withValues(alpha: .3)),
-                        prefixIcon: Icon(Icons.search, color: Colors.white.withValues(alpha: .4)),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      ),
-                      onSubmitted: (value) => _fetchSessions(page: 1, query: value),
-                    ),
-                  ),
+                  ),                  
                   const SizedBox(height: 16),
 
                   // Pagination Bar
