@@ -93,12 +93,14 @@ class AppRoutes {
       title: 'Comparison',
       icon: Icons.compare_arrows_outlined,
       description: 'Head-to-head insights',
+      implemented: true,
     ),
     DrawerDestination(
       route: user,
       title: 'Profile',
       icon: Icons.person_outline,
       description: 'Account & preferences',
+      implemented: true,
     ),
   ];
 
