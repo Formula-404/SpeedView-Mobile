@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
+import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/widgets/speedview_app_bar.dart';
+import 'package:speedview/common/widgets/speedview_drawer.dart';
+
 import '../models/driver.dart';
 import '../widgets/driver_card.dart';
 import 'driver_detail_page.dart';
@@ -207,15 +211,8 @@ class _DriverListPageState extends State<DriverListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF161B22),
-      appBar: AppBar(
-        title: const Text(
-          'Drivers',
-          style: TextStyle(color: Color(0xFFE6EDF3)),
-        ),
-        backgroundColor: const Color(0xFF161B22),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFFE6EDF3)),
-      ),
+      drawer: const SpeedViewDrawer(currentRoute: AppRoutes.drivers),
+      appBar: const SpeedViewAppBar(title: 'Drivers'),
       floatingActionButton: _isAdmin
           ? FloatingActionButton.extended(
               onPressed: () => _openForm(),
@@ -229,7 +226,13 @@ class _DriverListPageState extends State<DriverListPage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildBackRow(context),
+              const SizedBox(height: 18),
+              _buildMetricsRow(),
+              const SizedBox(height: 18),
+
               // ===== CTA LAPS & PIT (paling atas) =====
               Row(
                 children: [
@@ -266,7 +269,7 @@ class _DriverListPageState extends State<DriverListPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
               // search bar
               TextField(
@@ -281,17 +284,17 @@ class _DriverListPageState extends State<DriverListPage> {
                   filled: true,
                   fillColor: const Color(0xFF0D1117),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide:
                         const BorderSide(color: Colors.white24),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide:
                         const BorderSide(color: Colors.white24),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide:
                         const BorderSide(color: Colors.red, width: 2),
                   ),
@@ -356,6 +359,89 @@ class _DriverListPageState extends State<DriverListPage> {
     );
   }
 
+  Widget _buildBackRow(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white10,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: Colors.white70,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            'Back to Home',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricsRow() {
+    return Row(
+      children: [
+        _buildMetricChip(
+          label: 'Total drivers',
+          value: _drivers.length.toString(),
+        ),
+        const SizedBox(width: 8),
+        _buildMetricChip(
+          label: 'Visible',
+          value: _filtered.length.toString(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricChip({required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1F2933), Color(0xFF111827)],
+        ),
+        border: Border.all(color: Colors.white24.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFFFF7A5A),
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCtaCard({
     required IconData icon,
     required String title,
@@ -377,6 +463,13 @@ class _DriverListPageState extends State<DriverListPage> {
           border: Border.all(
             color: Colors.white24.withOpacity(0.25),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.5),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Row(
           children: [

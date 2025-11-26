@@ -1,8 +1,14 @@
+// lib/home/screens/home_screen.dart
 import 'package:flutter/material.dart';
 
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
+
+// override tujuan tombol tertentu
+import 'package:speedview/driver/screens/driver_list_page.dart';
+import 'package:speedview/laps/screens/laps_list_page.dart';
+import 'package:speedview/pit/screens/pit_list_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,15 +37,44 @@ class HomeScreen extends StatelessWidget {
                 .where((dest) => dest.route != AppRoutes.home)
                 .map(
                   (destination) => GestureDetector(
-                    onTap: () => Navigator.of(context)
-                        .pushReplacementNamed(destination.route),
+                    onTap: () {
+                      // ⬇️ Khusus beberapa kartu, kita arahkan ke halaman Flutter custom
+                      if (destination.title == 'Drivers') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DriverListPage(),
+                          ),
+                        );
+                      } else if (destination.title == 'Laps') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LapsListPage(),
+                          ),
+                        );
+                      } else if (destination.title == 'Pit Stops' ||
+                          destination.title == 'Pit') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PitListPage(),
+                          ),
+                        );
+                      } else {
+                        // yang lain tetap pakai routing lama
+                        Navigator.of(context)
+                            .pushReplacementNamed(destination.route);
+                      }
+                    },
                     child: Container(
                       width: MediaQuery.of(context).size.width / 2 - 30,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: .08),
+                          color:
+                              Colors.white.withValues(alpha: .08),
                         ),
                         color: const Color(0xFF0F151E),
                       ),
