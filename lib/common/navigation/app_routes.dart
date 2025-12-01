@@ -45,6 +45,13 @@ class AppRoutes {
       implemented: true,
     ),
     DrawerDestination(
+      route: user,
+      title: 'Profile',
+      icon: Icons.person_outline,
+      description: 'Account & preferences',
+      implemented: true,
+    ),
+    DrawerDestination(
       route: meetings,
       title: 'Meetings',
       icon: Icons.event_note_outlined,
@@ -106,13 +113,6 @@ class AppRoutes {
       icon: Icons.compare_arrows_outlined,
       description: 'Head-to-head insights',
       implemented: false,
-    ),
-    DrawerDestination(
-      route: user,
-      title: 'Profile',
-      icon: Icons.person_outline,
-      description: 'Account & preferences',
-      implemented: true,
     ),
   ];
 
