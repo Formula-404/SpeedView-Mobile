@@ -40,11 +40,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Logo Placeholder
-                    const Icon(
-                      Icons.speed,
-                      size: 64,
-                      color: Colors.black,
-                    ),
+                    const Icon(Icons.speed, size: 64, color: Colors.black),
                     const SizedBox(height: 16),
                     const Text(
                       'Sign In',
@@ -57,10 +53,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 8),
                     const Text(
                       'Sign in to your account to continue',
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 14.0, color: Colors.grey),
                     ),
                     const SizedBox(height: 32.0),
                     TextField(
@@ -73,7 +66,10 @@ class _LoginPageState extends State<LoginPage> {
                         hintStyle: const TextStyle(color: Colors.black38),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                          borderSide: const BorderSide(
+                            color: Colors.black45,
+                            width: 1.0,
+                          ),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -81,10 +77,15 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 16.0,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20.0),
@@ -98,7 +99,10 @@ class _LoginPageState extends State<LoginPage> {
                         hintStyle: const TextStyle(color: Colors.black38),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                          borderSide: const BorderSide(
+                            color: Colors.black45,
+                            width: 1.0,
+                          ),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -106,10 +110,15 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 16.0,
+                        ),
                       ),
                       obscureText: true,
                     ),
@@ -119,11 +128,10 @@ class _LoginPageState extends State<LoginPage> {
                         String username = _usernameController.text;
                         String password = _passwordController.text;
 
-                        final response =
-                            await request.login("http://127.0.0.1:8000/login-flutter/", {
-                          'username': username,
-                          'password': password,
-                        });
+                        final response = await request.login(
+                          "http://127.0.0.1:8000/login-flutter/",
+                          {'username': username, 'password': password},
+                        );
 
                         if (request.loggedIn) {
                           String message = response['message'];
@@ -134,8 +142,9 @@ class _LoginPageState extends State<LoginPage> {
                               ..hideCurrentSnackBar()
                               ..showSnackBar(
                                 SnackBar(
-                                    content: Text("$message Welcome, $uname."),
-                                    backgroundColor: Colors.green),
+                                  content: Text("$message Welcome, $uname."),
+                                  backgroundColor: Colors.green,
+                                ),
                               );
                           }
                         } else {
@@ -170,7 +179,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         'Sign in',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24.0),

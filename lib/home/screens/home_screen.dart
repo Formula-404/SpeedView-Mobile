@@ -9,6 +9,7 @@ import 'package:speedview/common/widgets/speedview_drawer.dart';
 import 'package:speedview/driver/screens/driver_list_page.dart';
 import 'package:speedview/laps/screens/laps_list_page.dart';
 import 'package:speedview/pit/screens/pit_list_page.dart';
+import 'package:speedview/user/screens/profile.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,7 +18,20 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const SpeedViewDrawer(currentRoute: AppRoutes.home),
-      appBar: const SpeedViewAppBar(title: 'SpeedView Home'),
+      appBar: SpeedViewAppBar(
+        title: 'SpeedView Home',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
