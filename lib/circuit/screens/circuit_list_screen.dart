@@ -44,7 +44,7 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
         }).toList();
         bool isAdminUser = circuits.isNotEmpty ? circuits.first.isAdmin : false;
 
-        setState(() {
+        setState((){
           _allCircuits = circuits;
           _filteredCircuits = circuits;
           _isAdmin = isAdminUser;

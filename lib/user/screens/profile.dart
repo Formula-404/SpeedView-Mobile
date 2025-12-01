@@ -11,26 +11,31 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStateMixin {
+class _ProfilePageState extends State<ProfilePage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   // Profile Info Controllers
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   String _role = '';
   String _themePreference = 'dark';
-  
+
   // Change Password Controllers
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmNewPasswordController = TextEditingController();
-  
+  final TextEditingController _confirmNewPasswordController =
+      TextEditingController();
+
   // Danger Zone Controllers
-  final TextEditingController _deletePasswordController = TextEditingController();
-  final TextEditingController _deleteConfirmController = TextEditingController();
+  final TextEditingController _deletePasswordController =
+      TextEditingController();
+  final TextEditingController _deleteConfirmController =
+      TextEditingController();
 
   bool _isLoading = true;
-  final String _baseUrl = "https://helven-marcia-speedview.pbp.cs.ui.ac.id";
+  final String _baseUrl = "http://127.0.0.1:8000";
 
   @override
   void initState() {
@@ -55,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   Future<void> _fetchProfile() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.get("$_baseUrl/user/profile-flutter/");
+      final response = await request.get("$_baseUrl/profile-flutter/");
       if (response['status'] == true) {
         setState(() {
           _usernameController.text = response['username'];
@@ -65,7 +70,10 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
           _isLoading = false;
         });
       } else {
-        _showSnackBar(response['message'] ?? 'Failed to load profile', Colors.red);
+        _showSnackBar(
+          response['message'] ?? 'Failed to load profile',
+          Colors.red,
+        );
       }
     } catch (e) {
       _showSnackBar('Error: $e', Colors.red);
@@ -76,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     final request = context.read<CookieRequest>();
     try {
       final response = await request.postJson(
-        "$_baseUrl/user/edit-profile-flutter/",
+        "$_baseUrl/edit-profile-flutter/",
         jsonEncode({
           'username': _usernameController.text,
           'email': _emailController.text,
@@ -100,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     final request = context.read<CookieRequest>();
     try {
       final response = await request.postJson(
-        "$_baseUrl/user/change-password-flutter/",
+        "$_baseUrl/change-password-flutter/",
         jsonEncode({
           'old_password': _currentPasswordController.text,
           'new_password': _newPasswordController.text,
@@ -127,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     final request = context.read<CookieRequest>();
     try {
       final response = await request.postJson(
-        "$_baseUrl/user/delete-account-flutter/",
+        "$_baseUrl/delete-account-flutter/",
         jsonEncode({
           'password': _deletePasswordController.text,
           'confirm_text': _deleteConfirmController.text,
@@ -153,7 +161,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   Future<void> _logout() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.post("$_baseUrl/user/logout-flutter/", {});
+      final response = await request.post("$_baseUrl/logout-flutter/", {});
       if (mounted) {
         if (response['status'] == true) {
           Navigator.pushReplacement(
@@ -170,9 +178,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   }
 
   void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   @override
@@ -189,14 +197,23 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
       appBar: AppBar(
         title: Row(
           children: [
-            const Text('Profile Settings', style: TextStyle(color: Color(0xFFE6EDF3))),
+            const Text(
+              'Profile Settings',
+              style: TextStyle(color: Color(0xFFE6EDF3)),
+            ),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _role == 'admin' ? Colors.red.withValues(alpha: 0.2) : Colors.blue.withValues(alpha: 0.2),
+                color: _role == 'admin'
+                    ? Colors.red.withValues(alpha: 0.2)
+                    : Colors.blue.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: _role == 'admin' ? Colors.red.withValues(alpha: 0.5) : Colors.blue.withValues(alpha: 0.5)),
+                border: Border.all(
+                  color: _role == 'admin'
+                      ? Colors.red.withValues(alpha: 0.5)
+                      : Colors.blue.withValues(alpha: 0.5),
+                ),
               ),
               child: Text(
                 _role.toUpperCase(),
@@ -277,7 +294,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                   style: TextStyle(color: Color(0xB3E6EDF3), fontSize: 14),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Role Display
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -294,13 +311,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         children: [
                           const Text(
                             'Account Role',
-                            style: TextStyle(color: Color(0xB3E6EDF3), fontSize: 12),
+                            style: TextStyle(
+                              color: Color(0xB3E6EDF3),
+                              fontSize: 12,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             _role == 'admin' ? 'Administrator' : 'User',
                             style: TextStyle(
-                              color: _role == 'admin' ? Colors.red[400] : Colors.blue[400],
+                              color: _role == 'admin'
+                                  ? Colors.red[400]
+                                  : Colors.blue[400],
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -308,7 +330,10 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: _role == 'admin'
                               ? Colors.red.withValues(alpha: 0.2)
@@ -323,7 +348,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         child: Text(
                           _role.toUpperCase(),
                           style: TextStyle(
-                            color: _role == 'admin' ? Colors.red[400] : Colors.blue[400],
+                            color: _role == 'admin'
+                                ? Colors.red[400]
+                                : Colors.blue[400],
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -342,7 +369,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                   decoration: _buildInputDecoration(''),
                 ),
                 const SizedBox(height: 16),
-                
+
                 _buildLabel('Email address'),
                 TextField(
                   controller: _emailController,
@@ -386,12 +413,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[600],
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Save Changes',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
               ],
@@ -443,7 +476,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                   controller: _currentPasswordController,
                   obscureText: true,
                   style: const TextStyle(color: Color(0xFFE6EDF3)),
-                  decoration: _buildInputDecoration('Enter your current password'),
+                  decoration: _buildInputDecoration(
+                    'Enter your current password',
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -468,7 +503,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                   controller: _confirmNewPasswordController,
                   obscureText: true,
                   style: const TextStyle(color: Color(0xFFE6EDF3)),
-                  decoration: _buildInputDecoration('Confirm your new password'),
+                  decoration: _buildInputDecoration(
+                    'Confirm your new password',
+                  ),
                 ),
                 const SizedBox(height: 32),
 
@@ -479,12 +516,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[600],
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Update Password', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Update Password',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
               ],
@@ -536,14 +579,19 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.red.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.warning_amber_rounded, color: Colors.red),
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.red,
+                          ),
                           const SizedBox(width: 8),
                           const Text(
                             'Delete Account',
@@ -567,7 +615,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         controller: _deletePasswordController,
                         obscureText: true,
                         style: const TextStyle(color: Color(0xFFE6EDF3)),
-                        decoration: _buildInputDecoration('Enter your password to confirm'),
+                        decoration: _buildInputDecoration(
+                          'Enter your password to confirm',
+                        ),
                       ),
                       const SizedBox(height: 16),
 
@@ -575,7 +625,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                       TextField(
                         controller: _deleteConfirmController,
                         style: const TextStyle(color: Color(0xFFE6EDF3)),
-                        decoration: _buildInputDecoration('Type DELETE in capital letters'),
+                        decoration: _buildInputDecoration(
+                          'Type DELETE in capital letters',
+                        ),
                       ),
                       const SizedBox(height: 24),
 
@@ -586,12 +638,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red[700],
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text('Delete My Account', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            'Delete My Account',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ],
