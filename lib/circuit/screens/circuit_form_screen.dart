@@ -15,7 +15,6 @@ class CircuitFormScreen extends StatefulWidget {
 class _CircuitFormScreenState extends State<CircuitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   
-  // Controllers
   final _nameController = TextEditingController();
   final _mapUrlController = TextEditingController();
   final _locationController = TextEditingController();
@@ -53,11 +52,12 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
 
     final request = context.read<CookieRequest>();
     final isEdit = widget.circuit != null;
+    
+    final baseUrl = "http://127.0.0.1:8000"; 
     final url = isEdit 
-        ? 'http://127.0.0.1:8000/circuit/api/${widget.circuit!.id}/update/'
-        : 'http://127.0.0.1:8000/circuit/api/create/';
+        ? '$baseUrl/circuit/api/${widget.circuit!.id}/update/'
+        : '$baseUrl/circuit/api/create/';
 
-    // Data Map
     final Map<String, dynamic> data = {
       'name': _nameController.text,
       'map_image_url': _mapUrlController.text,
@@ -105,7 +105,7 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
         elevation: 0,
         title: Text(widget.circuit != null ? 'Edit Circuit' : 'Add Circuit', style: const TextStyle(color: Colors.white)),
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -115,15 +115,15 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [              
-              _buildTextField('Circuit Name', _nameController, true),
-              _buildTextField('Map Image URL', _mapUrlController, false, isUrl: true), // False (Optional)
+            children: [
+              _buildTextField('Circuit Name', _nameController, true, hint: 'e.g. Adelaide Street Circuit'),
+              _buildTextField('Map Image URL', _mapUrlController, false, isUrl: true, hint: 'https://...'),
               
               Row(
                 children: [
-                  Expanded(child: _buildTextField('Location', _locationController, true)),
+                  Expanded(child: _buildTextField('Location', _locationController, true, hint: 'e.g. Adelaide')),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildTextField('Country', _countryController, true)),
+                  Expanded(child: _buildTextField('Country', _countryController, true, hint: 'e.g. Australia')),
                 ],
               ),
               
@@ -153,15 +153,15 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
               
               Row(
                 children: [
-                  Expanded(child: _buildTextField('Length (km)', _lengthController, true, isNumber: true)),
+                  Expanded(child: _buildTextField('Length (km)', _lengthController, true, isNumber: true, hint: 'e.g. 3.780')),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildTextField('Turns', _turnsController, true, isNumber: true)),
+                  Expanded(child: _buildTextField('Turns', _turnsController, true, isNumber: true, hint: 'e.g. 16')),
                 ],
               ),
 
-              _buildTextField('Grands Prix Names', _gpController, true),
-              _buildTextField('Seasons', _seasonsController, true),
-              _buildTextField('GP Held (Count)', _gpHeldController, true, isNumber: true),
+              _buildTextField('Grands Prix Names', _gpController, true, hint: 'e.g. Australian Grand Prix'),
+              _buildTextField('Seasons', _seasonsController, true, hint: 'e.g. 1985–1995'),
+              _buildTextField('GP Held (Count)', _gpHeldController, true, isNumber: true, hint: 'e.g. 11'),
 
               const SizedBox(height: 32),
               ElevatedButton(
@@ -183,7 +183,12 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, bool required, {bool isNumber = false, bool isUrl = false}) {
+  Widget _buildTextField(
+    String label, 
+    TextEditingController controller, 
+    bool required, 
+    {bool isNumber = false, bool isUrl = false, String? hint}
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
@@ -199,11 +204,14 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(color: Colors.white54),
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13), 
           filled: true,
           fillColor: const Color(0xFF0F151F),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white10)),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFFB4D46))),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
@@ -225,6 +233,7 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
           fillColor: const Color(0xFF0F151F),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white10)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );

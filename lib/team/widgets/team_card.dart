@@ -1,223 +1,267 @@
 import 'package:flutter/material.dart';
-import '../models/team_model.dart';
+import '../models/team.dart';
 
 class TeamCard extends StatelessWidget {
   final Team team;
-  final VoidCallback onTap;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-  final bool isAdmin;
+  final VoidCallback? onTap;
 
   const TeamCard({
     super.key,
     required this.team,
-    required this.onTap,
-    this.onEdit,
-    this.onDelete,
-    this.isAdmin = false,
+    this.onTap,
   });
 
-  Color _parseColor(String hexString) {
-    try {
-      final buffer = StringBuffer();
-      if (hexString.length == 7) buffer.write('ff');
-      buffer.write(hexString.replaceFirst('#', ''));
-      return Color(int.parse(buffer.toString(), radix: 16));
-    } catch (e) {
-      return Colors.white;
-    }
+  Color _parseColor(String hex) {
+    if (hex.isEmpty) return Colors.transparent;
+    final clean = hex.replaceAll('#', '');
+    if (clean.length != 6) return Colors.transparent;
+    return Color(int.parse('FF$clean', radix: 16));
+  }
+
+  String _countryDisplay() {
+    final parts = <String>[];
+    if (team.country.isNotEmpty) parts.add(team.country);
+    if (team.base.isNotEmpty) parts.add(team.base);
+    return parts.join(' • ');
   }
 
   @override
   Widget build(BuildContext context) {
-    const cardColor = Color(0xFF0F151F);
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Logo
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          team.teamLogoUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (ctx, error, stack) => const Icon(
-                            Icons.broken_image, 
-                            color: Colors.white24,
-                            size: 20
+    final primary = _parseColor(team.teamColourHex);
+    final secondary = team.teamColourSecondaryHex.isNotEmpty
+        ? _parseColor(team.teamColourSecondaryHex)
+        : _parseColor(team.teamColourSecondary);
+
+    final textTheme = Theme.of(context).textTheme;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D1117).withOpacity(0.8),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+        ),
+        child: Column(
+          children: [
+            // Header row
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+              child: Row(
+                children: [
+                  _buildLogo(primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                team.teamName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.03),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                ),
+                              ),
+                              child: Text(
+                                team.shortCode.isNotEmpty
+                                    ? team.shortCode
+                                    : '—',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Color(0xB3FFFFFF),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _countryDisplay().isNotEmpty
+                              ? _countryDisplay()
+                              : '—',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0x99FFFFFF),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    
-                    // Name & Short Code
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            team.teamName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.05),
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: Colors.white.withOpacity(0.1)),
-                                ),
-                                child: Text(
-                                  team.shortCode,
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  "${team.country} • ${team.base}",
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
-                                    fontSize: 11,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 16),
-                
-                Row(
-                  children: [
-                    // Primary Color
-                    Container(
-                      width: 16, height: 16,
-                      decoration: BoxDecoration(
-                        color: _parseColor(team.teamColourHex),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      team.teamColourHex,
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11),
-                    ),
-                    const SizedBox(width: 12),
-                    
-                    // Secondary Color
-                    if (team.teamColourSecondaryHex.isNotEmpty) ...[
+                  ),
+                ],
+              ),
+            ),
+
+            const Spacer(),
+
+            // Swatches + active badge
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              child: Row(
+                children: [
+                  Row(
+                    children: [
                       Container(
-                        width: 16, height: 16,
+                        width: 14,
+                        height: 14,
                         decoration: BoxDecoration(
-                          color: _parseColor(team.teamColourSecondaryHex),
+                          color: primary == Colors.transparent
+                              ? Colors.white.withOpacity(0.02)
+                              : primary,
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.1),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        team.teamColourSecondaryHex,
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11),
+                        team.teamColourHex.isNotEmpty
+                            ? team.teamColourHex
+                            : '—',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0x99FFFFFF),
+                        ),
                       ),
                     ],
-
-                    const Spacer(),
-
-                    // Active Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: team.isActive 
-                            ? Colors.green.withOpacity(0.1) 
-                            : Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(
-                          color: team.isActive 
-                              ? Colors.green.withOpacity(0.4) 
-                              : Colors.white.withOpacity(0.2),
-                        ),
-                      ),
-                      child: Text(
-                        team.isActive ? "ACTIVE" : "INACTIVE",
-                        style: TextStyle(
-                          color: team.isActive ? Colors.greenAccent : Colors.white60,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                // Admin Actions (Delete/Edit)
-                if (isAdmin) ...[
-                  const Divider(color: Colors.white10, height: 24),
+                  ),
+                  const SizedBox(width: 10),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton.icon(
-                        onPressed: onEdit,
-                        icon: const Icon(Icons.edit, size: 16, color: Colors.blueAccent),
-                        label: const Text("Edit", style: TextStyle(color: Colors.blueAccent)),
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: secondary == Colors.transparent
+                              ? Colors.transparent
+                              : secondary,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                        ),
                       ),
-                      TextButton.icon(
-                        onPressed: onDelete,
-                        icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
-                        label: const Text("Delete", style: TextStyle(color: Colors.redAccent)),
+                      const SizedBox(width: 4),
+                      Text(
+                        (team.teamColourSecondaryHex.isNotEmpty ||
+                                team.teamColourSecondary.isNotEmpty)
+                            ? (team.teamColourSecondaryHex.isNotEmpty
+                                ? team.teamColourSecondaryHex
+                                : '#${team.teamColourSecondary}')
+                            : '—',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0x99FFFFFF),
+                        ),
                       ),
                     ],
-                  )
-                ]
-              ],
+                  ),
+                  const Spacer(),
+                  _buildActiveBadge(),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildLogo(Color primary) {
+    final fallback = Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: primary == Colors.transparent
+            ? Colors.white.withOpacity(0.04)
+            : primary.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        team.shortCode.isNotEmpty
+            ? team.shortCode
+            : (team.teamName.isNotEmpty ? team.teamName[0] : '?'),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+
+    if (team.teamLogoUrl.isEmpty) return fallback;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        team.teamLogoUrl,
+        width: 40,
+        height: 40,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => fallback,
+      ),
+    );
+  }
+
+  Widget _buildActiveBadge() {
+    if (team.isActive) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: const Color(0x6622C55E)),
+          color: const Color(0x1A22C55E),
+        ),
+        child: const Text(
+          'ACTIVE',
+          style: TextStyle(
+            fontSize: 10,
+            color: Color(0xFF4ADE80),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          color: Colors.white.withOpacity(0.05),
+        ),
+        child: const Text(
+          'INACTIVE',
+          style: TextStyle(
+            fontSize: 10,
+            color: Color(0x99FFFFFF),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
   }
 }
