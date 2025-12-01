@@ -28,7 +28,7 @@ class AppRoutes {
   static const String laps = '/laps';
   static const String pit = '/pit';
 
-  // alias biar baris:
+  // alias biar:
   // drawer: SpeedViewDrawer(currentRoute: AppRoutes.pitStops)
   // tetap jalan
   static const String pitStops = pit;
@@ -42,6 +42,13 @@ class AppRoutes {
       title: 'Home',
       icon: Icons.dashboard_outlined,
       description: 'SpeedView overview hub',
+      implemented: true,
+    ),
+    DrawerDestination(
+      route: user,
+      title: 'Profile',
+      icon: Icons.person_outline,
+      description: 'Account & preferences',
       implemented: true,
     ),
     DrawerDestination(
@@ -105,13 +112,6 @@ class AppRoutes {
       title: 'Comparison',
       icon: Icons.compare_arrows_outlined,
       description: 'Head-to-head insights',
-      implemented: true,
-    ),
-    DrawerDestination(
-      route: user,
-      title: 'Profile',
-      icon: Icons.person_outline,
-      description: 'Account & preferences',
       implemented: true,
     ),
   ];

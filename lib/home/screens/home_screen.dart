@@ -9,15 +9,157 @@ import 'package:speedview/common/widgets/speedview_drawer.dart';
 import 'package:speedview/driver/screens/driver_list_page.dart';
 import 'package:speedview/laps/screens/laps_list_page.dart';
 import 'package:speedview/pit/screens/pit_list_page.dart';
+import 'package:speedview/user/screens/profile.dart';
 
-class HomeScreen extends StatelessWidget {
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:speedview/user/screens/login.dart';
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _username = 'User';
+  String _role = 'User';
+  final String _baseUrl = "http://127.0.0.1:8000";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfile();
+  }
+
+  Future<void> _fetchProfile() async {
+    final request = context.read<CookieRequest>();
+    try {
+      final response = await request.get("$_baseUrl/profile-flutter/");
+      if (response['status'] == true) {
+        if (mounted) {
+          setState(() {
+            _username = response['username'];
+            _role = response['role'];
+          });
+        }
+      }
+    } catch (e) {
+      // Silent error or retry
+    }
+  }
+
+  Future<void> _logout() async {
+    final request = context.read<CookieRequest>();
+    try {
+      final response = await request.post("$_baseUrl/logout-flutter/", {});
+      if (mounted) {
+        if (response['status'] == true) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response['message']), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const SpeedViewDrawer(currentRoute: AppRoutes.home),
-      appBar: const SpeedViewAppBar(title: 'SpeedView Home'),
+      appBar: SpeedViewAppBar(
+        title: 'SpeedView Home',
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_circle, color: Colors.white),
+            offset: const Offset(0, 50),
+            color: const Color(0xFF161B22),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Colors.white24),
+            ),
+            onSelected: (value) {
+              if (value == 'profile') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              } else if (value == 'logout') {
+                _logout();
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                enabled: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _username,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _role == 'admin' ? Colors.red.withValues(alpha: 0.2) : Colors.blue.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: _role == 'admin' ? Colors.red.withValues(alpha: 0.5) : Colors.blue.withValues(alpha: 0.5)),
+                      ),
+                      child: Text(
+                        _role.toUpperCase(),
+                        style: TextStyle(
+                          color: _role == 'admin' ? Colors.red[400] : Colors.blue[400],
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Divider(color: Colors.white24),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.white70, size: 20),
+                    SizedBox(width: 12),
+                    Text('Profile', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red, size: 20),
+                    SizedBox(width: 12),
+                    Text('Log Out', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -59,6 +201,13 @@ class HomeScreen extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => const PitListPage(),
+                          ),
+                        );
+                      } else if (destination.title == 'Profile') {
+                         Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProfilePage(),
                           ),
                         );
                       } else {
