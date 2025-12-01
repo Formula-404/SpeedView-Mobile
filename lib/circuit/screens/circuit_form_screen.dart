@@ -76,10 +76,16 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
       final response = await request.post(url, data);
 
       if (context.mounted) {
-         Navigator.pop(context, true);
-         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(isEdit ? "Circuit updated" : "Circuit created"), backgroundColor: Colors.green),
-         );
+         if (response['ok'] == true) {
+             Navigator.pop(context, true);
+             ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(response['message'] ?? "Success"), backgroundColor: Colors.green),
+             );
+         } else {
+             ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(response['error'] ?? "Failed"), backgroundColor: Colors.red),
+             );
+         }
       }
     } catch (e) {
       if (context.mounted) {
@@ -92,15 +98,12 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const cardColor = Color(0xFF0F151F);
-    final isEdit = widget.circuit != null;
-
     return Scaffold(
       backgroundColor: const Color(0xFF05070B),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(isEdit ? 'Edit Circuit' : 'Add Circuit', style: const TextStyle(color: Colors.white)),
+        title: Text(widget.circuit != null ? 'Edit Circuit' : 'Add Circuit', style: const TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -112,10 +115,10 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildSectionTitle('Basic Info'),
+            children: [              
               _buildTextField('Circuit Name', _nameController, true),
-              _buildTextField('Map Image URL', _mapUrlController, false, isUrl: true),
+              _buildTextField('Map Image URL', _mapUrlController, false, isUrl: true), // False (Optional)
+              
               Row(
                 children: [
                   Expanded(child: _buildTextField('Location', _locationController, true)),
@@ -124,8 +127,8 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
                 ],
               ),
               
-              const SizedBox(height: 24),
-              _buildSectionTitle('Technical Specs'),
+              const SizedBox(height: 16),
+              
               Row(
                 children: [
                   Expanded(
@@ -147,6 +150,7 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
                   ),
                 ],
               ),
+              
               Row(
                 children: [
                   Expanded(child: _buildTextField('Length (km)', _lengthController, true, isNumber: true)),
@@ -155,8 +159,6 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
                 ],
               ),
 
-              const SizedBox(height: 24),
-              _buildSectionTitle('History'),
               _buildTextField('Grands Prix Names', _gpController, true),
               _buildTextField('Seasons', _seasonsController, true),
               _buildTextField('GP Held (Count)', _gpHeldController, true, isNumber: true),
@@ -170,23 +172,13 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Text(
-                  isEdit ? 'Update Circuit' : 'Create Circuit',
+                  widget.circuit != null ? 'Update Circuit' : 'Create Circuit',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Text(
-        title,
-        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -199,8 +191,8 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
         style: const TextStyle(color: Colors.white),
         keyboardType: isNumber ? TextInputType.number : (isUrl ? TextInputType.url : TextInputType.text),
         validator: (value) {
-          if (required && (value == null || value.isEmpty)) {
-            return 'Required';
+          if (required && (value == null || value.trim().isEmpty)) {
+            return '$label is required';
           }
           return null;
         },
