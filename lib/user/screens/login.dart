@@ -1,9 +1,9 @@
-import 'package:speedview/home/screens/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:speedview/common/constants.dart';
 import 'package:speedview/user/screens/register.dart';
-import 'package:speedview/home/screens/home_screen.dart';
+import 'package:speedview/common/navigation/app_routes.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -39,7 +39,6 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Logo Placeholder
                     const Icon(
                       Icons.speed,
                       size: 64,
@@ -73,7 +72,8 @@ class _LoginPageState extends State<LoginPage> {
                         hintStyle: const TextStyle(color: Colors.black38),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                          borderSide: const BorderSide(
+                              color: Colors.black45, width: 1.0),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -81,10 +81,11 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                          borderSide:
+                              const BorderSide(color: Colors.red, width: 2.0),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 16.0),
                       ),
                     ),
                     const SizedBox(height: 20.0),
@@ -98,7 +99,8 @@ class _LoginPageState extends State<LoginPage> {
                         hintStyle: const TextStyle(color: Colors.black38),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                          borderSide: const BorderSide(
+                              color: Colors.black45, width: 1.0),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -106,10 +108,11 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                          borderSide:
+                              const BorderSide(color: Colors.red, width: 2.0),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 16.0),
                       ),
                       obscureText: true,
                     ),
@@ -119,23 +122,30 @@ class _LoginPageState extends State<LoginPage> {
                         String username = _usernameController.text;
                         String password = _passwordController.text;
 
-                        final response =
-                            await request.login("http://127.0.0.1:8000/login-flutter/", {
-                          'username': username,
-                          'password': password,
-                        });
+                        final response = await request.login(
+                          buildSpeedViewUrl('/login-flutter/'),
+                          {
+                            'username': username,
+                            'password': password,
+                          },
+                        );
 
                         if (request.loggedIn) {
                           String message = response['message'];
                           String uname = response['username'];
                           if (context.mounted) {
-                            Navigator.pushReplacementNamed(context, '/');
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.home,
+                            );
                             ScaffoldMessenger.of(context)
                               ..hideCurrentSnackBar()
                               ..showSnackBar(
                                 SnackBar(
-                                    content: Text("$message Welcome, $uname."),
-                                    backgroundColor: Colors.green),
+                                  content:
+                                      Text("$message Welcome, $uname."),
+                                  backgroundColor: Colors.green,
+                                ),
                               );
                           }
                         } else {
@@ -161,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: const Color(0xFF111827), // Gray 900
+                        backgroundColor: const Color(0xFF111827),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0),
                         ),
@@ -170,7 +180,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         'Sign in',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24.0),
@@ -186,7 +199,8 @@ class _LoginPageState extends State<LoginPage> {
                       child: RichText(
                         text: const TextSpan(
                           text: "Don't have an account? ",
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                          style:
+                              TextStyle(color: Colors.grey, fontSize: 14),
                           children: [
                             TextSpan(
                               text: 'Sign up',
