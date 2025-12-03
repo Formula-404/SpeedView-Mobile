@@ -3,8 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/Team.dart';
+import 'team_detail_screen.dart';
+import '../models/team.dart';
 import '../widgets/team_card.dart';
+
+const String apiListUrl =
+    'https://helven-marcia-speedview.pbp.cs.ui.ac.id/team/api/';
 
 class TeamListScreen extends StatefulWidget {
   const TeamListScreen({super.key});
@@ -42,7 +46,7 @@ class _TeamListScreenState extends State<TeamListScreen> {
     });
 
     try {
-      final res = await http.get(Uri.parse("http://127.0.0.1:8000/team/api/"));
+      final res = await http.get(Uri.parse(apiListUrl));
 
       if (res.statusCode != 200) {
         throw Exception('Status ${res.statusCode}: ${res.reasonPhrase}');
@@ -112,10 +116,29 @@ class _TeamListScreenState extends State<TeamListScreen> {
           onRefresh: _loadTeams,
           child: LayoutBuilder(
             builder: (context, constraints) {
+              final width = constraints.maxWidth;
+
+              int crossAxisCount;
+              double aspectRatio;
+
+              if (width < 420) {
+                // very small / narrow phones: 1 card per row
+                crossAxisCount = 1;
+                aspectRatio = 3.0; // width / height -> wide cards
+              } else if (width < 900) {
+                // normal phones: 2 columns
+                crossAxisCount = 2;
+                aspectRatio = 1.8;
+              } else {
+                // tablets / large screens
+                crossAxisCount = 3;
+                aspectRatio = 1.8;
+              }
+
               return CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // Header + search + meta row (unchanged from previous answer)
+                  // Header + search + meta row
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -131,37 +154,32 @@ class _TeamListScreenState extends State<TeamListScreen> {
                               Flexible(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
+                                  children: [
                                     Row(
-                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text(
-                                          'Home',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Color(0x99FFFFFF),
-                                          ),
-                                        ),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          '›',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Color(0x99FFFFFF),
-                                          ),
-                                        ),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          'Team',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.white,
+                                        InkWell(
+                                          borderRadius: BorderRadius.circular(10),
+                                          onTap: () => Navigator.of(context).maybePop(),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(0.06),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color: Colors.white.withOpacity(0.12),
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              Icons.arrow_back_ios_new_rounded,
+                                              size: 18,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 8),
-                                    Text(
+                                    const SizedBox(height: 14),
+                                    const Text(
                                       'Teams',
                                       style: TextStyle(
                                         fontSize: 32,
@@ -298,17 +316,16 @@ class _TeamListScreenState extends State<TeamListScreen> {
                   else
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
+                        horizontal: 16,
                         vertical: 4,
                       ),
                       sliver: SliverGrid(
                         gridDelegate:
                             SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              constraints.maxWidth > 600 ? 3 : 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 1.1,
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          childAspectRatio: aspectRatio,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -316,7 +333,15 @@ class _TeamListScreenState extends State<TeamListScreen> {
                             return TeamCard(
                               team: team,
                               onTap: () {
-                                // later: navigate to team_detail
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TeamDetailScreen(
+                                      teamName: team.teamName,
+                                      isAdmin: true, // wire from auth later
+                                    ),
+                                  ),
+                                );
                               },
                             );
                           },
