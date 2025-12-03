@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
-import 'package:speedview/common/constants.dart';
+import 'package:speedview/user/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
