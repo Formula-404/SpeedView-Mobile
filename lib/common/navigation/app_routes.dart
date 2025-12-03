@@ -107,6 +107,7 @@ class AppRoutes {
       description: 'Strategy and timing',
       implemented: true,
     ),
+
     DrawerDestination(
       route: comparison,
       title: 'Comparison',

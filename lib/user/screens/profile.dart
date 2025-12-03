@@ -1,3 +1,5 @@
+// lib/user/screens/profile.dart
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -66,15 +68,15 @@ class _ProfilePageState extends State<ProfilePage>
           await request.get(buildSpeedViewUrl('/profile-flutter/'));
       if (response['status'] == true) {
         setState(() {
-          _usernameController.text = response['username'];
-          _emailController.text = response['email'];
-          _role = response['role'];
-          _themePreference = response['theme_preference'];
+          _usernameController.text = response['username'] as String;
+          _emailController.text = response['email'] as String;
+          _role = response['role'] as String;
+          _themePreference = response['theme_preference'] as String;
           _isLoading = false;
         });
       } else {
         _showSnackBar(
-          response['message'] ?? 'Failed to load profile',
+          (response['message'] ?? 'Failed to load profile').toString(),
           Colors.red,
         );
       }
@@ -95,12 +97,15 @@ class _ProfilePageState extends State<ProfilePage>
         }),
       );
 
-      if (mounted) {
-        if (response['status'] == true) {
-          _showSnackBar('Profile updated successfully!', Colors.green);
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        _showSnackBar('Profile updated successfully!', Colors.green);
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Failed to update profile').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -119,15 +124,18 @@ class _ProfilePageState extends State<ProfilePage>
         }),
       );
 
-      if (mounted) {
-        if (response['status'] == true) {
-          _showSnackBar('Password changed successfully!', Colors.green);
-          _currentPasswordController.clear();
-          _newPasswordController.clear();
-          _confirmNewPasswordController.clear();
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        _showSnackBar('Password changed successfully!', Colors.green);
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmNewPasswordController.clear();
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Failed to change password').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -145,16 +153,19 @@ class _ProfilePageState extends State<ProfilePage>
         }),
       );
 
-      if (mounted) {
-        if (response['status'] == true) {
-          _showSnackBar('Account deleted successfully', Colors.green);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        _showSnackBar('Account deleted successfully', Colors.green);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Failed to delete account').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -166,15 +177,18 @@ class _ProfilePageState extends State<ProfilePage>
     try {
       final response =
           await request.post(buildSpeedViewUrl('/logout-flutter/'), {});
-      if (mounted) {
-        if (response['status'] == true) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Logout failed').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -407,8 +421,7 @@ class _ProfilePageState extends State<ProfilePage>
                       value: _themePreference,
                       dropdownColor: const Color(0xFF161B22),
                       isExpanded: true,
-                      style:
-                          const TextStyle(color: Color(0xFFE6EDF3)),
+                      style: const TextStyle(color: Color(0xFFE6EDF3)),
                       items: const [
                         DropdownMenuItem(
                           value: 'light',
@@ -523,10 +536,7 @@ class _ProfilePageState extends State<ProfilePage>
                   padding: EdgeInsets.only(top: 4.0),
                   child: Text(
                     'Password must be at least 8 characters',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -652,7 +662,8 @@ class _ProfilePageState extends State<ProfilePage>
                       TextField(
                         controller: _deletePasswordController,
                         obscureText: true,
-                        style: const TextStyle(color: Color(0xFFE6EDF3)),
+                        style:
+                            const TextStyle(color: Color(0xFFE6EDF3)),
                         decoration: _buildInputDecoration(
                           'Enter your password to confirm',
                         ),
