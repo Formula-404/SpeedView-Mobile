@@ -3,10 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/navigation/bottom_nav_shell.dart';
 import 'package:speedview/common/screens/coming_soon_screen.dart';
-import 'package:speedview/home/screens/home_screen.dart';
 import 'package:speedview/user/screens/login.dart';
 
+import 'car/screens/car_list_screen.dart';
 import 'meeting/meeting_service.dart';
 import 'meeting/screens/meeting_list_screen.dart';
 import 'session/screens/session_list_screen.dart';
@@ -77,10 +78,16 @@ class SpeedViewApp extends StatelessWidget {
       initialRoute: initialRoute,
       routes: {
         AppRoutes.login: (_) => const LoginPage(),
-        AppRoutes.home: (_) => const HomeScreen(),
+        AppRoutes.home: (_) =>
+            const BottomNavigationShell(initialRoute: AppRoutes.home),
+        AppRoutes.comparison: (_) =>
+            const BottomNavigationShell(initialRoute: AppRoutes.comparison),
+        AppRoutes.user: (_) =>
+            const BottomNavigationShell(initialRoute: AppRoutes.user),
         AppRoutes.meetings: (_) => MeetingListScreen(service: service),
         AppRoutes.sessions: (context) => const SessionListScreen(),
         AppRoutes.circuits: (context) => const CircuitListScreen(),
+        AppRoutes.cars: (_) => const CarListScreen(),
       },
       onGenerateRoute: (settings) {
         if (placeholderRoutes.contains(settings.name)) {
