@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:speedview/common/constants.dart';
+import 'package:speedview/user/constants.dart';
 import 'package:speedview/user/screens/login.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -184,7 +184,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
 
                         final response = await request.postJson(
-                          buildSpeedViewUrl('/register-flutter/'),
+                          "https://helven-marcia-speedview.pbp.cs.ui.ac.id/register-flutter/",
                           jsonEncode(<String, String>{
                             'username': username,
                             'password': password,
