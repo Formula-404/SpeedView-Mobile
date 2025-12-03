@@ -35,7 +35,7 @@ class _ProfilePageState extends State<ProfilePage>
       TextEditingController();
 
   bool _isLoading = true;
-  final String _baseUrl = "http://127.0.0.1:8000";
+  final String _baseUrl = "https://helven-marcia-speedview.pbp.cs.ui.ac.id";
 
   @override
   void initState() {
