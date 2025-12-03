@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:speedview/common/constants.dart';
 import 'package:speedview/user/screens/login.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -60,7 +61,7 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> _fetchProfile() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.get("$_baseUrl/profile-flutter/");
+      final response = await request.get(buildSpeedViewUrl('/profile-flutter/'));
       if (response['status'] == true) {
         setState(() {
           _usernameController.text = response['username'];

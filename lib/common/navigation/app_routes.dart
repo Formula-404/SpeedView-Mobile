@@ -84,7 +84,7 @@ class AppRoutes {
       title: 'Cars',
       icon: Icons.car_rental_outlined,
       description: 'Technical breakdown',
-      implemented: false,
+      implemented: true,
     ),
     DrawerDestination(
       route: circuits,
@@ -112,7 +112,14 @@ class AppRoutes {
       title: 'Comparison',
       icon: Icons.compare_arrows_outlined,
       description: 'Head-to-head insights',
-      implemented: false,
+      implemented: true,
+    ),
+    DrawerDestination(
+      route: user,
+      title: 'Profile',
+      icon: Icons.person_outline,
+      description: 'Account & preferences',
+      implemented: true,
     ),
   ];
 
