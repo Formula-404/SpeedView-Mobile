@@ -128,7 +128,7 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
       appBar: const SpeedViewAppBar(title: 'Circuits'),
       drawer: const SpeedViewDrawer(currentRoute: AppRoutes.circuits),
       floatingActionButton: _isAdmin
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               backgroundColor: const Color(0xFFFB4D46),
               onPressed: () async {
                 final result = await Navigator.push(
@@ -137,7 +137,11 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
                 );
                 if (result == true) _fetchCircuits();
               },
-              child: const Icon(Icons.add, color: Colors.white),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                "Add Circuit", 
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+              ),
             )
           : null,
       body: SafeArea(
@@ -200,31 +204,44 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
                   ? const Center(child: CircularProgressIndicator(color: Color(0xFFFB4D46)))
                   : _filteredCircuits.isEmpty
                       ? Center(child: Text('No circuits found.', style: TextStyle(color: Colors.white.withOpacity(0.5))))
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          itemCount: _filteredCircuits.length,
-                          itemBuilder: (context, index) {
-                            final circuit = _filteredCircuits[index];
-                            return CircuitCard(
-                              circuit: circuit,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CircuitDetailScreen(circuit: circuit),
-                                  ),
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            int crossAxisCount = constraints.maxWidth < 600 ? 2 : 4;                            
+                            double childAspectRatio = constraints.maxWidth < 600 ? 0.85 : 0.9;
+
+                            return GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount, 
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: childAspectRatio,
+                              ),
+                              itemCount: _filteredCircuits.length,
+                              itemBuilder: (context, index) {
+                                final circuit = _filteredCircuits[index];
+                                return CircuitCard(
+                                  circuit: circuit,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CircuitDetailScreen(circuit: circuit),
+                                      ),
+                                    );
+                                  },
+                                  onEdit: () async {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CircuitFormScreen(circuit: circuit),
+                                      ),
+                                    );
+                                    if (result == true) _fetchCircuits();
+                                  },
+                                  onDelete: () => _showDeleteConfirmation(circuit),
                                 );
                               },
-                              onEdit: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CircuitFormScreen(circuit: circuit),
-                                  ),
-                                );
-                                if (result == true) _fetchCircuits();
-                              },
-                              onDelete: () => _showDeleteConfirmation(circuit),
                             );
                           },
                         ),

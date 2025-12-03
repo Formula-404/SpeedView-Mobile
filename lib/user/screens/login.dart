@@ -130,16 +130,21 @@ class _LoginPageState extends State<LoginPage> {
                         String password = _passwordController.text;
 
                         final response = await request.login(
-                            buildSpeedViewUrl('/login-flutter/'), {
-                          'username': username,
-                          'password': password,
-                        });
+                          buildSpeedViewUrl('/login-flutter/'),
+                          {
+                            'username': username,
+                            'password': password,
+                          },
+                        );
 
                         if (request.loggedIn) {
                           String message = response['message'];
                           String uname = response['username'];
                           if (context.mounted) {
-                            Navigator.pushReplacementNamed(context, '/');
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.home,
+                            );
                             ScaffoldMessenger.of(context)
                               ..hideCurrentSnackBar()
                               ..showSnackBar(
