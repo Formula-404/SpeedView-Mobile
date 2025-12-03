@@ -5,6 +5,7 @@ import 'package:speedview/common/constants.dart';
 import 'package:speedview/user/screens/profile.dart';
 import 'package:speedview/user/screens/login.dart';
 
+
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
@@ -39,6 +40,9 @@ class MyHomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
+
+
+            // tombol profile
             SizedBox(
               width: 200,
               child: ElevatedButton(
@@ -61,6 +65,8 @@ class MyHomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+
+            // tombol logout
             SizedBox(
               width: 200,
               child: ElevatedButton(

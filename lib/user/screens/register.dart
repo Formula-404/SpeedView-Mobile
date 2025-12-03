@@ -66,9 +66,16 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 32.0),
                     TextField(
                       controller: _usernameController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Username',
                         hintText: 'Choose a username',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),
@@ -84,9 +91,16 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 20.0),
                     TextField(
                       controller: _emailController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Email',
                         hintText: 'Enter your email',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),
@@ -102,9 +116,16 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 20.0),
                     TextField(
                       controller: _passwordController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Password',
                         hintText: 'Create a password',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),
@@ -121,9 +142,16 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 20.0),
                     TextField(
                       controller: _confirmPasswordController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Confirm Password',
                         hintText: 'Confirm your password',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(color: Colors.black45, width: 1.0),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),

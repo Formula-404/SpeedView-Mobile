@@ -1,6 +1,6 @@
 const String speedViewBaseUrl = String.fromEnvironment(
   'SPEEDVIEW_BASE_URL',
-  defaultValue: 'https://helven-marcia-speedview.pbp.cs.ui.ac.id',
+  defaultValue: 'http://localhost:8000',
 );
 
 String buildSpeedViewUrl(String path) {
