@@ -27,7 +27,7 @@ class _DriverFormPageState extends State<DriverFormPage> {
   late TextEditingController _headshotController;
 
   bool _isSaving = false;
-  static const _baseUrl = 'http://127.0.0.1:8000';
+  static const _baseUrl = 'http://127.0.0.1:8000/driver/api/create/';
 
   @override
   void initState() {
