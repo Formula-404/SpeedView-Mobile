@@ -28,9 +28,9 @@ class AppRoutes {
   static const String laps = '/laps';
   static const String pit = '/pit';
 
-  // alias biar baris:
+  // alias biar:
   // drawer: SpeedViewDrawer(currentRoute: AppRoutes.pitStops)
-  // bisa jalan tanpa ngubah file lain
+  // tetap jalan
   static const String pitStops = pit;
 
   static const String comparison = '/comparison';
@@ -70,7 +70,7 @@ class AppRoutes {
       title: 'Drivers',
       icon: Icons.sports_motorsports_outlined,
       description: 'Driver stats & profiles',
-      implemented: true, // sudah ada DriverListPage
+      implemented: true,
     ),
     DrawerDestination(
       route: teams,
@@ -84,35 +84,36 @@ class AppRoutes {
       title: 'Cars',
       icon: Icons.car_rental_outlined,
       description: 'Technical breakdown',
-      implemented: false,
+      implemented: true,
     ),
     DrawerDestination(
       route: circuits,
       title: 'Circuits',
       icon: Icons.route_outlined,
       description: 'Track layouts & metadata',
-      implemented: true, // modul circuits sudah jalan
+      implemented: true,
     ),
     DrawerDestination(
       route: laps,
       title: 'Laps',
       icon: Icons.speed_outlined,
       description: 'Lap-by-lap analytics',
-      implemented: true, // LapsListPage
+      implemented: true,
     ),
     DrawerDestination(
       route: pit,
       title: 'Pit Stops',
       icon: Icons.build_outlined,
       description: 'Strategy and timing',
-      implemented: true, // PitListPage
+      implemented: true,
     ),
+
     DrawerDestination(
       route: comparison,
       title: 'Comparison',
       icon: Icons.compare_arrows_outlined,
       description: 'Head-to-head insights',
-      implemented: false,
+      implemented: true,
     ),
   ];
 
