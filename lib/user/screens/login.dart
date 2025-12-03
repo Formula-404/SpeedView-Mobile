@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:speedview/common/constants.dart';
 import 'package:speedview/user/screens/register.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/home/screens/home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -40,11 +41,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Logo Placeholder
-                    const Icon(
-                      Icons.speed,
-                      size: 64,
-                      color: Colors.black,
-                    ),
+                    const Icon(Icons.speed, size: 64, color: Colors.black),
                     const SizedBox(height: 16),
                     const Text(
                       'Sign In',
@@ -57,45 +54,72 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 8),
                     const Text(
                       'Sign in to your account to continue',
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 14.0, color: Colors.grey),
                     ),
                     const SizedBox(height: 32.0),
                     TextField(
                       controller: _usernameController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Username',
                         hintText: 'Enter your username',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: Colors.black45,
+                            width: 1.0,
+                          ),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 16.0,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20.0),
                     TextField(
                       controller: _passwordController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Password',
                         hintText: 'Enter your password',
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: const BorderSide(
+                            color: Colors.black45,
+                            width: 1.0,
+                          ),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: const BorderSide(color: Colors.grey),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
-                          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
                         ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 16.0,
+                        ),
                       ),
                       obscureText: true,
                     ),
@@ -106,10 +130,9 @@ class _LoginPageState extends State<LoginPage> {
                         String password = _passwordController.text;
 
                         final response = await request.login(
-                            buildSpeedViewUrl('/login-flutter/'), {
-                          'username': username,
-                          'password': password,
-                        });
+                          "https://helven-marcia-speedview.pbp.cs.ui.ac.id/login-flutter/",
+                          {'username': username, 'password': password},
+                        );
 
                         if (request.loggedIn) {
                           String message = response['message'];
@@ -123,8 +146,9 @@ class _LoginPageState extends State<LoginPage> {
                               ..hideCurrentSnackBar()
                               ..showSnackBar(
                                 SnackBar(
-                                    content: Text("$message Welcome, $uname."),
-                                    backgroundColor: Colors.green),
+                                  content: Text("$message Welcome, $uname."),
+                                  backgroundColor: Colors.green,
+                                ),
                               );
                           }
                         } else {
@@ -159,7 +183,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text(
                         'Sign in',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24.0),

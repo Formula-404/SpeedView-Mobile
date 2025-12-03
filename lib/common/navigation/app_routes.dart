@@ -27,6 +27,12 @@ class AppRoutes {
   static const String circuits = '/circuits';
   static const String laps = '/laps';
   static const String pit = '/pit';
+
+  // alias biar baris:
+  // drawer: SpeedViewDrawer(currentRoute: AppRoutes.pitStops)
+  // bisa jalan tanpa ngubah file lain
+  static const String pitStops = pit;
+
   static const String comparison = '/comparison';
   static const String user = '/user';
 
@@ -36,6 +42,13 @@ class AppRoutes {
       title: 'Home',
       icon: Icons.dashboard_outlined,
       description: 'SpeedView overview hub',
+      implemented: true,
+    ),
+    DrawerDestination(
+      route: user,
+      title: 'Profile',
+      icon: Icons.person_outline,
+      description: 'Account & preferences',
       implemented: true,
     ),
     DrawerDestination(
@@ -50,18 +63,21 @@ class AppRoutes {
       title: 'Sessions',
       icon: Icons.schedule_outlined,
       description: 'Practice, Quali, Race timelines',
+      implemented: false,
     ),
     DrawerDestination(
       route: drivers,
       title: 'Drivers',
       icon: Icons.sports_motorsports_outlined,
       description: 'Driver stats & profiles',
+      implemented: true, // sudah ada DriverListPage
     ),
     DrawerDestination(
       route: teams,
       title: 'Teams',
       icon: Icons.handshake_outlined,
       description: 'Constructor details',
+      implemented: true,
     ),
     DrawerDestination(
       route: cars,
@@ -75,18 +91,21 @@ class AppRoutes {
       title: 'Circuits',
       icon: Icons.route_outlined,
       description: 'Track layouts & metadata',
+      implemented: true, // modul circuits sudah jalan
     ),
     DrawerDestination(
       route: laps,
       title: 'Laps',
       icon: Icons.speed_outlined,
       description: 'Lap-by-lap analytics',
+      implemented: true, // LapsListPage
     ),
     DrawerDestination(
       route: pit,
       title: 'Pit Stops',
       icon: Icons.build_outlined,
       description: 'Strategy and timing',
+      implemented: true, // PitListPage
     ),
     DrawerDestination(
       route: comparison,

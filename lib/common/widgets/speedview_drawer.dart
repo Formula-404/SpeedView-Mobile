@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/driver/screens/driver_list_page.dart';
+import 'package:speedview/laps/screens/laps_list_page.dart';
+import 'package:speedview/pit/screens/pit_list_page.dart';
 
 class SpeedViewDrawer extends StatelessWidget {
   const SpeedViewDrawer({super.key, required this.currentRoute});
@@ -24,6 +27,7 @@ class SpeedViewDrawer extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final destination = AppRoutes.destinations[index];
                   final selected = destination.route == currentRoute;
+
                   return ListTile(
                     leading: Icon(
                       destination.icon,
@@ -35,7 +39,8 @@ class SpeedViewDrawer extends StatelessWidget {
                         color: selected
                             ? Colors.white
                             : Colors.white.withValues(alpha: .9),
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                     subtitle: destination.description == null
@@ -50,8 +55,34 @@ class SpeedViewDrawer extends StatelessWidget {
                     selected: selected,
                     selectedTileColor: const Color(0x22FFFFFF),
                     onTap: () {
+                      // tutup drawer dulu
                       Navigator.of(context).pop();
-                      if (!selected) {
+
+                      // kalau lagi di halaman yang sama, tidak usah navigasi
+                      if (selected) return;
+
+                      // Routing khusus untuk modul yang sudah punya halaman sendiri
+                      if (destination.route == AppRoutes.drivers) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const DriverListPage(),
+                          ),
+                        );
+                      } else if (destination.route == AppRoutes.laps) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const LapsListPage(),
+                          ),
+                        );
+                      } else if (destination.route == AppRoutes.pit ||
+                          destination.route == AppRoutes.pitStops) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const PitListPage(),
+                          ),
+                        );
+                      } else {
+                        // sisanya tetap pakai named route seperti biasa
                         Navigator.of(context)
                             .pushReplacementNamed(destination.route);
                       }
