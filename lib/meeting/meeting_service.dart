@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 
-import 'package:speedview/common/constants.dart';
+import 'package:speedview/user/constants.dart';
 
 import 'models/meeting.dart';
 

@@ -77,7 +77,7 @@ class AppRoutes {
       title: 'Teams',
       icon: Icons.handshake_outlined,
       description: 'Constructor details',
-      implemented: false,
+      implemented: true,
     ),
     DrawerDestination(
       route: cars,
