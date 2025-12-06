@@ -58,9 +58,8 @@ class _TeamListScreenState extends State<TeamListScreen> {
       }
 
       final List<dynamic> data = body['data'] ?? [];
-      final teams = data
-          .map((e) => Team.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final teams =
+          data.map((e) => Team.fromJson(e as Map<String, dynamic>)).toList();
 
       if (!mounted) return;
       setState(() {
@@ -122,15 +121,12 @@ class _TeamListScreenState extends State<TeamListScreen> {
               double aspectRatio;
 
               if (width < 420) {
-                // very small / narrow phones: 1 card per row
                 crossAxisCount = 1;
-                aspectRatio = 3.0; // width / height -> wide cards
+                aspectRatio = 3.0;
               } else if (width < 900) {
-                // normal phones: 2 columns
                 crossAxisCount = 2;
                 aspectRatio = 1.8;
               } else {
-                // tablets / large screens
                 crossAxisCount = 3;
                 aspectRatio = 1.8;
               }
@@ -158,15 +154,25 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                     Row(
                                       children: [
                                         InkWell(
-                                          borderRadius: BorderRadius.circular(10),
-                                          onTap: () => Navigator.of(context).maybePop(),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          onTap: () {
+                                            Navigator.of(context)
+                                                .pushNamedAndRemoveUntil(
+                                              '/',
+                                              (route) => false,
+                                            );
+                                          },
                                           child: Container(
                                             padding: const EdgeInsets.all(6),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.06),
-                                              borderRadius: BorderRadius.circular(10),
+                                              color: Colors.white
+                                                  .withOpacity(0.06),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                               border: Border.all(
-                                                color: Colors.white.withOpacity(0.12),
+                                                color: Colors.white
+                                                    .withOpacity(0.12),
                                               ),
                                             ),
                                             child: const Icon(
@@ -216,15 +222,13 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                       ),
                                       hintText: 'Search team...',
                                       hintStyle: TextStyle(
-                                        color:
-                                            Colors.white.withOpacity(0.4),
+                                        color: Colors.white.withOpacity(0.4),
                                         fontSize: 14,
                                       ),
                                       border: InputBorder.none,
                                       suffixIcon: Icon(
                                         Icons.search,
-                                        color:
-                                            Colors.white.withOpacity(0.5),
+                                        color: Colors.white.withOpacity(0.5),
                                       ),
                                     ),
                                   ),
@@ -338,7 +342,7 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                   MaterialPageRoute(
                                     builder: (_) => TeamDetailScreen(
                                       teamName: team.teamName,
-                                      isAdmin: true, // wire from auth later
+                                      isAdmin: true,
                                     ),
                                   ),
                                 );
