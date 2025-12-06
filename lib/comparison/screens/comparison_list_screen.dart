@@ -11,11 +11,10 @@ class ComparisonListScreen extends StatefulWidget {
   const ComparisonListScreen({
     Key? key,
     this.onCreatePressed,
-    this.apiBaseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id', 
+    this.apiBaseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id',
   }) : super(key: key);
 
   final VoidCallback? onCreatePressed;
-
   final String apiBaseUrl;
 
   @override
@@ -47,7 +46,6 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
     );
 
     if (res.statusCode != 200) {
-      // Attempt to parse error if body is JSON; otherwise throw generic.
       throw Exception('Failed with status ${res.statusCode}');
     }
 
@@ -64,40 +62,78 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = const Color(0xFF010409);
-    final red = const Color(0xFFEF4444);
+    const bgColor = Color(0xFF0D1117);
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: bgColor,
-        elevation: 0,
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const Text(
-          'Comparisons',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFE6EDF3),
-          ),
-        ),
-        actions: [
-          if (widget.onCreatePressed != null)
-            IconButton(
-              icon: const Icon(Icons.add),
-              color: Colors.white,
-              onPressed: widget.onCreatePressed,
-              tooltip: 'Create Comparison',
-            ),
-        ],
-      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: Column(
             children: [
+              // HEADER
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: () {
+                                Navigator.of(context).pushNamedAndRemoveUntil(
+                                  '/',
+                                  (route) => false,
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.06),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.12),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Comparisons',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (widget.onCreatePressed != null)
+                    IconButton(
+                      onPressed: widget.onCreatePressed,
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      tooltip: 'Create Comparison',
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // TABS
               Row(
                 children: [
                   Expanded(
@@ -117,8 +153,10 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 12),
 
+              // CONTENT
               Expanded(
                 child: FutureBuilder<List<Comparison>>(
                   future: _future,
@@ -150,15 +188,14 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                         Expanded(
                           child: ListView.separated(
                             itemCount: items.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 8),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               final cmp = items[index];
                               return ComparisonCard(
                                 comparison: cmp,
                                 onTap: () {
-                                  // TODO: navigate to detail screen
-                                  // You already have cmp.detailUrl from backend
-                                  // which might map to a webview or deeplink.
+                                  // hook up navigation to detail here
                                 },
                               );
                             },
@@ -210,12 +247,13 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
         Expanded(
           child: Center(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.03),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withOpacity(0.1),
                 ),
               ),
               child: const Text(
@@ -224,6 +262,7 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                   color: Color(0xB3E6EDF3),
                   fontSize: 14,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -247,7 +286,8 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
         Expanded(
           child: Center(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.red.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(16),
