@@ -25,91 +25,102 @@ class CircuitCard extends StatelessWidget {
         side: BorderSide(color: Colors.white.withOpacity(0.1)),
       ),
       clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: onTap,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Map
-            Container(
-              height: 140,
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.all(16),
-              child: Image.network(
-                circuit.mapImageUrl != null && circuit.mapImageUrl!.isNotEmpty
-                    ? circuit.mapImageUrl!
-                    : 'https://placehold.co/600x400/0D1117/E6EDF3?text=No+Map',
-                fit: BoxFit.contain,
-                errorBuilder: (ctx, error, stackTrace) => const Center(
-                  child: Icon(Icons.map, size: 50, color: Colors.grey),
+            // MAP
+            Expanded(
+              flex: 3,
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(12),
+                child: Image.network(
+                  circuit.mapImageUrl != null && circuit.mapImageUrl!.isNotEmpty
+                      ? circuit.mapImageUrl!
+                      : 'https://placehold.co/600x400/0D1117/E6EDF3?text=No+Map',
+                  fit: BoxFit.contain,
+                  errorBuilder: (ctx, error, stackTrace) => const Center(
+                    child: Icon(Icons.map, size: 24, color: Colors.grey),
+                  ),
                 ),
               ),
             ),
             
-            // Info
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    circuit.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on, size: 14, color: Colors.white54),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          '${circuit.location}, ${circuit.country}',
-                          style: const TextStyle(
-                            color: Colors.white60,
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+            // informasi & tombol
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      circuit.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                  
-                  // Admin Actions
-                  if (circuit.isAdmin && circuit.isAdminCreated) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12.0),
-                      child: Divider(color: Colors.white10),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: onEdit,
-                          child: const Text(
-                            'EDIT',
-                            style: TextStyle(color: Colors.yellowAccent, fontWeight: FontWeight.bold),
+                    const SizedBox(height: 4),
+                    Text(
+                      circuit.country,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    
+                    const Spacer(),
+
+                    // tombol admin
+                    if (circuit.isAdmin) 
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          // Edit Button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: onEdit,
+                              borderRadius: BorderRadius.circular(4),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.yellow.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Icon(Icons.edit, size: 16, color: Colors.yellowAccent),
+                              ),
+                            ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: onDelete,
-                          child: const Text(
-                            'DELETE',
-                            style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                          const SizedBox(width: 8),
+                          // Delete Button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: onDelete,
+                              borderRadius: BorderRadius.circular(4),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    )
-                  ]
-                ],
+                        ],
+                      )
+                  ],
+                ),
               ),
             ),
           ],
