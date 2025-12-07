@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:speedview/common/navigation/app_routes.dart';
-import 'package:speedview/comparison/screens/comparison_screen.dart';
+import 'package:speedview/comparison/screens/comparison_list_screen.dart';
 import 'package:speedview/home/screens/home_screen.dart';
 import 'package:speedview/user/screens/profile.dart';
 
@@ -21,7 +21,7 @@ class _BottomNavigationShellState extends State<BottomNavigationShell> {
       label: 'Comparison',
       icon: Icons.compare_arrows_outlined,
       selectedIcon: Icons.compare_arrows,
-      builder: () => const ComparisonScreen(),
+      builder: () => const ComparisonListScreen(),
     ),
     _ShellDestination(
       route: AppRoutes.home,
