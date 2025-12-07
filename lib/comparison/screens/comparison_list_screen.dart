@@ -1,9 +1,13 @@
-// lib/comparison/screens/comparison_list_screen.dart
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 import '../models/Comparison.dart';
 import '../widgets/comparison_card.dart';
+
+import 'comparison_team_detail_screen.dart';
+import 'comparison_driver_detail_screen.dart';
+import 'comparison_circuit_detail_screen.dart';
 
 enum ComparisonScope { all, mine }
 
@@ -32,25 +36,20 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
   }
 
   Future<List<Comparison>> _fetchComparisons(ComparisonScope scope) async {
-    final scopeParam = scope == ComparisonScope.mine ? 'my' : 'all';
+  final request = context.read<CookieRequest>();
 
-    final uri = Uri.parse(
-      '${widget.apiBaseUrl}/comparison/api/list/?scope=$scopeParam',
-    );
+  final scopeParam = scope == ComparisonScope.mine ? 'my' : 'all';
 
-    final res = await http.get(
-      uri,
-      headers: const {
-        'Accept': 'application/json',
-      },
-    );
+  final response = await request.get(
+    '${widget.apiBaseUrl}/comparison/api/list/?scope=$scopeParam',
+  );
 
-    if (res.statusCode != 200) {
-      throw Exception('Failed with status ${res.statusCode}');
-    }
-
-    return Comparison.listFromResponseBody(res.body);
+  if (response['ok'] != true) {
+    throw Exception(response['error'] ?? 'Failed to load comparisons');
   }
+
+  return Comparison.listFromJson(response['data']);
+}
 
   void _changeScope(ComparisonScope scope) {
     if (_scope == scope) return;
@@ -126,7 +125,6 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                         Icons.add,
                         color: Colors.white,
                       ),
-                      tooltip: 'Create Comparison',
                     ),
                 ],
               ),
@@ -170,6 +168,7 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                     }
 
                     final items = snapshot.data ?? const <Comparison>[];
+
                     if (items.isEmpty) {
                       return _buildEmptyState();
                     }
@@ -192,10 +191,21 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                                 const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               final cmp = items[index];
+
                               return ComparisonCard(
                                 comparison: cmp,
                                 onTap: () {
-                                  // hook up navigation to detail here
+                                  if (cmp.module == 'team') {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ComparisonTeamDetailScreen(
+                                          comparison: cmp,
+                                          apiBaseUrl: widget.apiBaseUrl,
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 },
                               );
                             },
@@ -334,9 +344,7 @@ class _ScopeButton extends StatelessWidget {
       curve: Curves.easeOut,
       decoration: BoxDecoration(
         borderRadius: baseBorderRadius,
-        color: selected
-            ? _red
-            : Colors.grey.shade800.withOpacity(0.5),
+        color: selected ? _red : Colors.grey.shade800.withOpacity(0.5),
       ),
       child: Material(
         color: Colors.transparent,
@@ -353,9 +361,7 @@ class _ScopeButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: selected
-                      ? Colors.white
-                      : const Color(0xCCE6EDF3),
+                  color: selected ? Colors.white : const Color(0xCCE6EDF3),
                 ),
               ),
             ),
