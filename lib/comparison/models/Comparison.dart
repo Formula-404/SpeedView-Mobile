@@ -49,6 +49,15 @@ class Comparison {
     );
   }
 
+  static List<Comparison> listFromJson(dynamic data) {
+    if (data is! List<dynamic>) return <Comparison>[];
+
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map((json) => Comparison.fromJson(json))
+        .toList();
+  }
+
   static List<Comparison> listFromResponseBody(String body) {
     final decoded = jsonDecode(body) as Map<String, dynamic>;
     final ok = decoded['ok'] as bool? ?? false;

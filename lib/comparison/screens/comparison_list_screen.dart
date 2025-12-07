@@ -1,21 +1,25 @@
-// lib/comparison/screens/comparison_list_screen.dart
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 import '../models/Comparison.dart';
 import '../widgets/comparison_card.dart';
+
+import 'comparison_team_detail_screen.dart';
+import 'comparison_driver_detail_screen.dart';
+import 'comparison_circuit_detail_screen.dart';
+import 'comparison_create_screen.dart';
 
 enum ComparisonScope { all, mine }
 
 class ComparisonListScreen extends StatefulWidget {
   const ComparisonListScreen({
     Key? key,
-    this.onCreatePressed,
-    this.apiBaseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id', 
+    this.onCreatePressed, 
+    this.apiBaseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id',
   }) : super(key: key);
 
   final VoidCallback? onCreatePressed;
-
   final String apiBaseUrl;
 
   @override
@@ -33,25 +37,19 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
   }
 
   Future<List<Comparison>> _fetchComparisons(ComparisonScope scope) async {
+    final request = context.read<CookieRequest>();
+
     final scopeParam = scope == ComparisonScope.mine ? 'my' : 'all';
 
-    final uri = Uri.parse(
+    final response = await request.get(
       '${widget.apiBaseUrl}/comparison/api/list/?scope=$scopeParam',
     );
 
-    final res = await http.get(
-      uri,
-      headers: const {
-        'Accept': 'application/json',
-      },
-    );
-
-    if (res.statusCode != 200) {
-      // Attempt to parse error if body is JSON; otherwise throw generic.
-      throw Exception('Failed with status ${res.statusCode}');
+    if (response['ok'] != true) {
+      throw Exception(response['error'] ?? 'Failed to load comparisons');
     }
 
-    return Comparison.listFromResponseBody(res.body);
+    return Comparison.listFromJson(response['data']);
   }
 
   void _changeScope(ComparisonScope scope) {
@@ -62,42 +60,98 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
     });
   }
 
+  Future<void> _openCreateScreen() async {
+    final created = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => const ComparisonCreateScreen(),
+      ),
+    );
+
+    if (created == true && mounted) {
+      setState(() {
+        _future = _fetchComparisons(_scope);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bgColor = const Color(0xFF010409);
-    final red = const Color(0xFFEF4444);
+    const bgColor = Color(0xFF0D1117);
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: bgColor,
-        elevation: 0,
-        leading: const BackButton(
-          color: Colors.white,
-        ),
-        title: const Text(
-          'Comparisons',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFE6EDF3),
-          ),
-        ),
-        actions: [
-          if (widget.onCreatePressed != null)
-            IconButton(
-              icon: const Icon(Icons.add),
-              color: Colors.white,
-              onPressed: widget.onCreatePressed,
-              tooltip: 'Create Comparison',
-            ),
-        ],
-      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: Column(
             children: [
+              // HEADER
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: () {
+                                Navigator.of(context).pushNamedAndRemoveUntil(
+                                  '/',
+                                  (route) => false,
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.06),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.12),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Comparisons',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            _AddComparisonButton(
+                              onPressed: _openCreateScreen,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // TABS
               Row(
                 children: [
                   Expanded(
@@ -117,8 +171,10 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 12),
 
+              // CONTENT
               Expanded(
                 child: FutureBuilder<List<Comparison>>(
                   future: _future,
@@ -132,6 +188,7 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                     }
 
                     final items = snapshot.data ?? const <Comparison>[];
+
                     if (items.isEmpty) {
                       return _buildEmptyState();
                     }
@@ -150,15 +207,54 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                         Expanded(
                           child: ListView.separated(
                             itemCount: items.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 8),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               final cmp = items[index];
+
                               return ComparisonCard(
                                 comparison: cmp,
                                 onTap: () {
-                                  // TODO: navigate to detail screen
-                                  // You already have cmp.detailUrl from backend
-                                  // which might map to a webview or deeplink.
+                                  switch (cmp.module) {
+                                    case 'team':
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ComparisonTeamDetailScreen(
+                                            comparison: cmp,
+                                            apiBaseUrl: widget.apiBaseUrl,
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    case 'driver':
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ComparisonDriverDetailScreen(
+                                            comparison: cmp,
+                                            apiBaseUrl: widget.apiBaseUrl,
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    case 'circuit':
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ComparisonCircuitDetailScreen(
+                                            comparison: cmp,
+                                            apiBaseUrl: widget.apiBaseUrl,
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    default:
+                                      break;
+                                  }
                                 },
                               );
                             },
@@ -210,12 +306,13 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
         Expanded(
           child: Center(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.03),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withOpacity(0.1),
                 ),
               ),
               child: const Text(
@@ -224,6 +321,7 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                   color: Color(0xB3E6EDF3),
                   fontSize: 14,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -247,7 +345,8 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
         Expanded(
           child: Center(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.red.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(16),
@@ -294,9 +393,7 @@ class _ScopeButton extends StatelessWidget {
       curve: Curves.easeOut,
       decoration: BoxDecoration(
         borderRadius: baseBorderRadius,
-        color: selected
-            ? _red
-            : Colors.grey.shade800.withOpacity(0.5),
+        color: selected ? _red : Colors.grey.shade800.withOpacity(0.5),
       ),
       child: Material(
         color: Colors.transparent,
@@ -313,13 +410,46 @@ class _ScopeButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: selected
-                      ? Colors.white
-                      : const Color(0xCCE6EDF3),
+                  color: selected ? Colors.white : const Color(0xCCE6EDF3),
                 ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddComparisonButton extends StatelessWidget {
+  const _AddComparisonButton({
+    Key? key,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        backgroundColor: const Color(0xFFEF4444),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
+      icon: const Icon(
+        Icons.add,
+        size: 18,
+      ),
+      label: const Text(
+        'Add',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
