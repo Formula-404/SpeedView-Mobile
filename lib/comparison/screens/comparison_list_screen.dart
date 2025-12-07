@@ -8,13 +8,14 @@ import '../widgets/comparison_card.dart';
 import 'comparison_team_detail_screen.dart';
 import 'comparison_driver_detail_screen.dart';
 import 'comparison_circuit_detail_screen.dart';
+import 'comparison_create_screen.dart';
 
 enum ComparisonScope { all, mine }
 
 class ComparisonListScreen extends StatefulWidget {
   const ComparisonListScreen({
     Key? key,
-    this.onCreatePressed,
+    this.onCreatePressed, 
     this.apiBaseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id',
   }) : super(key: key);
 
@@ -36,20 +37,20 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
   }
 
   Future<List<Comparison>> _fetchComparisons(ComparisonScope scope) async {
-  final request = context.read<CookieRequest>();
+    final request = context.read<CookieRequest>();
 
-  final scopeParam = scope == ComparisonScope.mine ? 'my' : 'all';
+    final scopeParam = scope == ComparisonScope.mine ? 'my' : 'all';
 
-  final response = await request.get(
-    '${widget.apiBaseUrl}/comparison/api/list/?scope=$scopeParam',
-  );
+    final response = await request.get(
+      '${widget.apiBaseUrl}/comparison/api/list/?scope=$scopeParam',
+    );
 
-  if (response['ok'] != true) {
-    throw Exception(response['error'] ?? 'Failed to load comparisons');
+    if (response['ok'] != true) {
+      throw Exception(response['error'] ?? 'Failed to load comparisons');
+    }
+
+    return Comparison.listFromJson(response['data']);
   }
-
-  return Comparison.listFromJson(response['data']);
-}
 
   void _changeScope(ComparisonScope scope) {
     if (_scope == scope) return;
@@ -57,6 +58,20 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
       _scope = scope;
       _future = _fetchComparisons(scope);
     });
+  }
+
+  Future<void> _openCreateScreen() async {
+    final created = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => const ComparisonCreateScreen(),
+      ),
+    );
+
+    if (created == true && mounted) {
+      setState(() {
+        _future = _fetchComparisons(_scope);
+      });
+    }
   }
 
   @override
@@ -107,25 +122,30 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                           ],
                         ),
                         const SizedBox(height: 14),
-                        const Text(
-                          'Comparisons',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Comparisons',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            _AddComparisonButton(
+                              onPressed: _openCreateScreen,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  if (widget.onCreatePressed != null)
-                    IconButton(
-                      onPressed: widget.onCreatePressed,
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
-                    ),
                 ],
               ),
 
@@ -195,16 +215,45 @@ class _ComparisonListScreenState extends State<ComparisonListScreen> {
                               return ComparisonCard(
                                 comparison: cmp,
                                 onTap: () {
-                                  if (cmp.module == 'team') {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ComparisonTeamDetailScreen(
-                                          comparison: cmp,
-                                          apiBaseUrl: widget.apiBaseUrl,
+                                  switch (cmp.module) {
+                                    case 'team':
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ComparisonTeamDetailScreen(
+                                            comparison: cmp,
+                                            apiBaseUrl: widget.apiBaseUrl,
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                      break;
+                                    case 'driver':
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ComparisonDriverDetailScreen(
+                                            comparison: cmp,
+                                            apiBaseUrl: widget.apiBaseUrl,
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    case 'circuit':
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              ComparisonCircuitDetailScreen(
+                                            comparison: cmp,
+                                            apiBaseUrl: widget.apiBaseUrl,
+                                          ),
+                                        ),
+                                      );
+                                      break;
+                                    default:
+                                      break;
                                   }
                                 },
                               );
@@ -366,6 +415,41 @@ class _ScopeButton extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddComparisonButton extends StatelessWidget {
+  const _AddComparisonButton({
+    Key? key,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        backgroundColor: const Color(0xFFEF4444),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
+      icon: const Icon(
+        Icons.add,
+        size: 18,
+      ),
+      label: const Text(
+        'Add',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

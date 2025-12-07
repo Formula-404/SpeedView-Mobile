@@ -13,7 +13,6 @@ class ComparisonCard extends StatelessWidget {
 
   Color get _cardBg => const Color(0xFF0D1117); 
   Color get _borderColor => const Color(0xFF374151); 
-  Color get _red => const Color(0xFFEF4444); 
 
   @override
   Widget build(BuildContext context) {
