@@ -1,14 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
+import 'package:speedview/user/constants.dart';
 import 'team_detail_screen.dart';
+import 'team_form_screen.dart';
 import '../models/team.dart';
 import '../widgets/team_card.dart';
-
-const String apiListUrl =
-    'https://helven-marcia-speedview.pbp.cs.ui.ac.id/team/api/';
 
 class TeamListScreen extends StatefulWidget {
   const TeamListScreen({super.key});
@@ -24,11 +22,15 @@ class _TeamListScreenState extends State<TeamListScreen> {
   List<Team> _filteredTeams = [];
   bool _loading = true;
   String? _error;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
-    _loadTeams();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTeams();
+      _checkAdminStatus();
+    });
     _searchController.addListener(_applyFilter);
   }
 
@@ -39,25 +41,35 @@ class _TeamListScreenState extends State<TeamListScreen> {
     super.dispose();
   }
 
+  Future<void> _checkAdminStatus() async {
+    final request = context.read<CookieRequest>();
+    try {
+      final response = await request.get(buildSpeedViewUrl('/profile-flutter/'));
+      if (response['status'] == true) {
+         setState(() {
+           _isAdmin = response['role'] == 'admin';
+         });
+      }
+    } catch (_) {
+    }
+  }
+
   Future<void> _loadTeams() async {
     setState(() {
       _loading = true;
       _error = null;
     });
 
+    final request = context.read<CookieRequest>();
+
     try {
-      final res = await http.get(Uri.parse(apiListUrl));
+      final response = await request.get(buildSpeedViewUrl('/team/api/'));
 
-      if (res.statusCode != 200) {
-        throw Exception('Status ${res.statusCode}: ${res.reasonPhrase}');
+      if (response['ok'] != true) {
+        throw Exception(response['error'] ?? 'Failed to load teams');
       }
 
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      if (body['ok'] != true) {
-        throw Exception(body['error'] ?? 'Failed to load teams');
-      }
-
-      final List<dynamic> data = body['data'] ?? [];
+      final List<dynamic> data = response['data'] ?? [];
       final teams = data
           .map((e) => Team.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -111,6 +123,21 @@ class _TeamListScreenState extends State<TeamListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D1117),
+      floatingActionButton: _isAdmin
+          ? FloatingActionButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TeamFormScreen()),
+                );
+                if (result == true) {
+                  _loadTeams();
+                }
+              },
+              backgroundColor: Colors.blue,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadTeams,
@@ -122,15 +149,12 @@ class _TeamListScreenState extends State<TeamListScreen> {
               double aspectRatio;
 
               if (width < 420) {
-                // very small / narrow phones: 1 card per row
                 crossAxisCount = 1;
-                aspectRatio = 3.0; // width / height -> wide cards
+                aspectRatio = 3.0;
               } else if (width < 900) {
-                // normal phones: 2 columns
                 crossAxisCount = 2;
                 aspectRatio = 1.8;
               } else {
-                // tablets / large screens
                 crossAxisCount = 3;
                 aspectRatio = 1.8;
               }
@@ -138,7 +162,6 @@ class _TeamListScreenState extends State<TeamListScreen> {
               return CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // Header + search + meta row
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -258,7 +281,6 @@ class _TeamListScreenState extends State<TeamListScreen> {
                     ),
                   ),
 
-                  // Content states
                   if (_loading)
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -332,16 +354,19 @@ class _TeamListScreenState extends State<TeamListScreen> {
                             final team = _filteredTeams[index];
                             return TeamCard(
                               team: team,
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => TeamDetailScreen(
                                       teamName: team.teamName,
-                                      isAdmin: true, // wire from auth later
+                                      isAdmin: _isAdmin,
                                     ),
                                   ),
                                 );
+                                if (result == true) {
+                                  _loadTeams();
+                                }
                               },
                             );
                           },
