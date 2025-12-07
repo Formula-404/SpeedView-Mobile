@@ -33,7 +33,7 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
 
   Future<void> _fetchCircuits() async {
     final request = context.read<CookieRequest>();
-    const String url = 'http://127.0.0.1:8000/circuit/api/';
+    const String url = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id/circuit/api/';
     
     try {
       final response = await request.get(url);
@@ -70,7 +70,7 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
 
   Future<void> _deleteCircuit(int id) async {
     final request = context.read<CookieRequest>();
-    final url = 'http://127.0.0.1:8000/circuit/api/$id/delete/';
+    final url = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id/circuit/api/$id/delete/';
     
     try {
       final response = await request.post(url, {});
