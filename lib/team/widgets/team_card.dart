@@ -30,7 +30,6 @@ class TeamCard extends StatelessWidget {
     if (raw.startsWith('http://') || raw.startsWith('https://')) {
       return raw;
     }
-    // Treat as relative path from your Django host
     const base = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
     if (raw.startsWith('/')) {
       return '$base$raw';
@@ -58,10 +57,9 @@ class TeamCard extends StatelessWidget {
           border: Border.all(color: Colors.white.withOpacity(0.1)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // mobile-friendly height
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top row: logo + name + shortcode + active
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -111,7 +109,6 @@ class TeamCard extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // Bottom row: colors + active badge
             Row(
               children: [
                 _colorSwatch(
