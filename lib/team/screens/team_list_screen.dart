@@ -125,20 +125,29 @@ class _TeamListScreenState extends State<TeamListScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0D1117),
       floatingActionButton: _isAdmin
-          ? FloatingActionButton(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TeamFormScreen()),
-                );
-                if (result == true) {
-                  _loadTeams();
-                }
-              },
-              backgroundColor: Colors.blue,
-              child: const Icon(Icons.add, color: Colors.white),
-            )
-          : null,
+        ? FloatingActionButton.extended(
+            backgroundColor: const Color(0xFFFB4D46),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TeamFormScreen(),
+                ),
+              );
+              if (result == true) {
+                _loadTeams();
+              }
+            },
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: const Text(
+              'Add Team',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          )
+        : null,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadTeams,
