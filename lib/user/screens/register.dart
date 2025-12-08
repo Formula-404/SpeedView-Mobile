@@ -184,11 +184,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
 
                         final response = await request.postJson(
-<<<<<<< HEAD
-                          buildSpeedViewUrl('/register-flutter/'),
-=======
                           "https://helven-marcia-speedview.pbp.cs.ui.ac.id/register-flutter/",
->>>>>>> 26501bee233e6632b9be856ed891b3ee9b2d90bf
                           jsonEncode(<String, String>{
                             'username': username,
                             'password': password,

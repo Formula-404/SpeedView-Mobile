@@ -1,4 +1,3 @@
-// lib/driver/screens/driver_detail_page.dart
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -29,7 +28,7 @@ class DriverDetailPage extends StatefulWidget {
 class _DriverDetailPageState extends State<DriverDetailPage> {
   late Driver _driver;
   bool _isDeleting = false;
-  static const _baseUrl = 'http://127.0.0.1:8000';
+  static const _baseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
 
   @override
   void initState() {
@@ -42,8 +41,9 @@ class _DriverDetailPageState extends State<DriverDetailPage> {
     final request = context.read<CookieRequest>();
 
     try {
+      // pakai endpoint mobile
       final response = await request.postJson(
-        "$_baseUrl/driver/api/${_driver.driverNumber}/delete/",
+        "$_baseUrl/driver/api/mobile/${_driver.driverNumber}/delete/",
         jsonEncode(<String, String>{}),
       );
 
@@ -131,10 +131,7 @@ class _DriverDetailPageState extends State<DriverDetailPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const LapsListPage(
-                              // kalau nanti LapsListPage punya filter driver,
-                              // kamu bisa kirim driver.driverNumber di sini
-                              ),
+                          builder: (_) => const LapsListPage(),
                         ),
                       );
                     },
@@ -150,9 +147,7 @@ class _DriverDetailPageState extends State<DriverDetailPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const PitListPage(
-                              // sama seperti Laps: bisa dikirim driver_number
-                              ),
+                          builder: (_) => const PitListPage(),
                         ),
                       );
                     },
