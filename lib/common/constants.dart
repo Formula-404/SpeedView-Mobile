@@ -28,7 +28,7 @@
 /// set environment variable SPEEDVIEW_BASE_URL saat build.
 const String speedViewBaseUrl = String.fromEnvironment(
   'SPEEDVIEW_BASE_URL',
-  defaultValue: 'http://127.0.0.1:8000',
+  defaultValue: 'https://helven-marcia-speedview.pbp.cs.ui.ac.id',
 );
 
 // Catatan:
