@@ -283,10 +283,14 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
                 const SizedBox(height: 28),
 
                 _buildLabel('Team Name', required: true),
-                _buildTextField(_nameController, hint: 'Red Bull Racing'),
+                _buildTextField(
+                  _nameController,
+                  hint: 'Red Bull Racing',
+                  readOnly: isEdit,
+                ),
                 const SizedBox(height: 6),
                 const Text(
-                  'Primary key; changing this renames the team.',
+                  'Primary key; cannot be changed.',
                   style: TextStyle(color: Color(0x99FFFFFF), fontSize: 11),
                 ),
                 const SizedBox(height: 24),
@@ -674,35 +678,42 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
     int? maxLines = 1,
     int? maxLength,
     TextInputType? keyboardType,
+    bool readOnly = false,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       maxLength: maxLength,
       keyboardType: keyboardType,
-      style: const TextStyle(color: Colors.white, fontSize: 14),
-      cursorColor: Colors.red,
+      readOnly: readOnly,
+      style: TextStyle(
+        color: readOnly ? const Color(0x80FFFFFF) : Colors.white,
+        fontSize: 14,
+      ),
+      cursorColor: readOnly ? Colors.transparent : Colors.red,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
+          borderSide: BorderSide(
+            color: Colors.white.withOpacity(readOnly ? 0.1 : 0.15),
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: BorderSide(
+            color: readOnly ? Colors.white.withOpacity(0.15) : Colors.red,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
+        fillColor: Colors.white.withOpacity(readOnly ? 0.03 : 0.05),
         counterText: "",
       ),
       validator: (val) {
-        if (hint == 'Required' && (val == null || val.isEmpty)) {
-          return 'This field is required';
-        }
+        // You can keep your existing validation logic here if needed
         return null;
       },
     );
