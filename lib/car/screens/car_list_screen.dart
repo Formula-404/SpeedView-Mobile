@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:speedview/common/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
@@ -22,17 +21,25 @@ class CarListScreen extends StatefulWidget {
 
 class _CarListScreenState extends State<CarListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _meetingKeyController = TextEditingController();
+  final TextEditingController _sessionKeyController = TextEditingController();
   final List<CarTelemetryEntry> _entries = [];
-  bool _loading = true;
+  bool _loading = false;
   String? _error;
   DateTime? _lastFetchedAt;
   CarDrsFilter _drsFilter = CarDrsFilter.all;
+  bool _isAdmin = false;
+  bool _hasRequestedData = false;
+  int? _activeMeetingKey;
+  int? _activeSessionKey;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_handleSearchChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _fetchEntries());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAdminStatus();
+    });
   }
 
   @override
@@ -40,30 +47,50 @@ class _CarListScreenState extends State<CarListScreen> {
     _searchController
       ..removeListener(_handleSearchChanged)
       ..dispose();
+    _meetingKeyController.dispose();
+    _sessionKeyController.dispose();
     super.dispose();
   }
 
   void _handleSearchChanged() => setState(() {});
 
-  Future<void> _fetchEntries() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  Future<void> _openManualEntries() async {
+    if (!_isAdmin) return;
+    await Navigator.of(context).pushNamed(AppRoutes.carManual);
+    if (!mounted) return;
+    if (_activeMeetingKey != null) {
+      await _refreshCurrentQuery();
+    }
+  }
 
+  Future<void> _fetchEntriesForFilters({
+    required int meetingKey,
+    int? sessionKey,
+  }) async {
     final request = context.read<CookieRequest>();
     if (!request.loggedIn) {
       setState(() {
         _error = 'Silakan login untuk melihat data mobil.';
         _entries.clear();
         _loading = false;
+        _isAdmin = false;
+        _hasRequestedData = true;
       });
       return;
     }
 
+    setState(() {
+      _loading = true;
+      _error = null;
+      _hasRequestedData = true;
+    });
+
     try {
       final repo = CarRepository(request);
-      final results = await repo.fetchEntries();
+      final results = await repo.fetchMeetingEntries(
+        meetingKey: meetingKey,
+        sessionKey: sessionKey,
+      );
       if (!mounted) return;
       setState(() {
         _entries
@@ -71,6 +98,8 @@ class _CarListScreenState extends State<CarListScreen> {
           ..addAll(results);
         _lastFetchedAt = DateTime.now();
         _loading = false;
+        _activeMeetingKey = meetingKey;
+        _activeSessionKey = sessionKey;
       });
     } on CarRepositoryException catch (e) {
       if (!mounted) return;
@@ -85,6 +114,74 @@ class _CarListScreenState extends State<CarListScreen> {
         _error = e.toString();
         _entries.clear();
         _loading = false;
+      });
+    }
+  }
+
+  Future<void> _loadTelemetryFromForm() async {
+    final meetingText = _meetingKeyController.text.trim();
+    final meetingKey = int.tryParse(meetingText);
+    if (meetingKey == null) {
+      _showInputError('Meeting key harus berupa angka.');
+      return;
+    }
+
+    final sessionText = _sessionKeyController.text.trim();
+    int? sessionKey;
+    if (sessionText.isNotEmpty) {
+      sessionKey = int.tryParse(sessionText);
+      if (sessionKey == null) {
+        _showInputError('Session key harus berupa angka.');
+        return;
+      }
+    }
+
+    await _fetchEntriesForFilters(
+      meetingKey: meetingKey,
+      sessionKey: sessionKey,
+    );
+  }
+
+  Future<void> _refreshCurrentQuery() async {
+    final meetingKey = _activeMeetingKey;
+    if (meetingKey == null) {
+      return;
+    }
+    await _fetchEntriesForFilters(
+      meetingKey: meetingKey,
+      sessionKey: _activeSessionKey,
+    );
+  }
+
+  Future<void> _checkAdminStatus() async {
+    final request = context.read<CookieRequest>();
+    if (!request.loggedIn) {
+      setState(() {
+        _isAdmin = false;
+        if (!_hasRequestedData) {
+          _loading = false;
+        }
+      });
+      return;
+    }
+
+    try {
+      final response = await request.get(buildSpeedViewUrl('/profile-flutter/'));
+      if (!mounted) return;
+      final role = response['role']?.toString().toLowerCase();
+      setState(() {
+        _isAdmin = role == 'admin';
+        if (!_hasRequestedData) {
+          _loading = false;
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isAdmin = false;
+        if (!_hasRequestedData) {
+          _loading = false;
+        }
       });
     }
   }
@@ -110,7 +207,7 @@ class _CarListScreenState extends State<CarListScreen> {
       body: SafeArea(
         top: false,
         child: RefreshIndicator(
-          onRefresh: _fetchEntries,
+          onRefresh: _refreshCurrentQuery,
           backgroundColor: const Color(0xFF0F151E),
           color: const Color(0xFFFB4D46),
           child: ListView(
@@ -121,17 +218,23 @@ class _CarListScreenState extends State<CarListScreen> {
             children: [
               _buildHeader(),
               const SizedBox(height: 20),
-              _buildSearchBar(),
-              const SizedBox(height: 12),
-              _buildDrsFilters(),
+              _buildFilterCard(),
               const SizedBox(height: 20),
-              _buildSummary(),
-              const SizedBox(height: 12),
+              if (_hasRequestedData) ...[
+                _buildSearchBar(),
+                const SizedBox(height: 12),
+                _buildDrsFilters(),
+                const SizedBox(height: 20),
+                _buildSummary(),
+                const SizedBox(height: 12),
+              ],
+              if (!_hasRequestedData && !_loading)
+                _buildInitialState(),
               if (_loading) _buildLoadingState(),
               if (!_loading && _error != null) _buildErrorState(),
-              if (!_loading && _error == null && _filteredEntries.isEmpty)
+              if (_hasRequestedData && !_loading && _error == null && _filteredEntries.isEmpty)
                 _buildEmptyState(),
-              if (!_loading && _error == null && _filteredEntries.isNotEmpty)
+              if (_hasRequestedData && !_loading && _error == null && _filteredEntries.isNotEmpty)
                 ..._filteredEntries.map(
                   (entry) => CarTelemetryCard(
                     entry: entry,
@@ -174,17 +277,110 @@ class _CarListScreenState extends State<CarListScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Manual Telemetry Entries',
+          'Car Telemetry Explorer',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
               ),
         ),
         const SizedBox(height: 4),
         Text(
-          'Entries synced from SpeedView web admin.',
+          'Masukkan meeting key untuk menarik telemetry terbaru per driver.',
           style: const TextStyle(color: Colors.white70),
         ),
       ],
+    );
+  }
+
+  Widget _buildFilterCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: .08)),
+        color: const Color(0xFF0C121C),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Meeting filter',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _meetingKeyController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Meeting key',
+              hintText: 'mis. 1219',
+              filled: true,
+              fillColor: Color(0xFF0F151E),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _sessionKeyController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Session key (opsional)',
+              hintText: 'mis. 9493',
+              filled: true,
+              fillColor: Color(0xFF0F151E),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: _loadTelemetryFromForm,
+                  icon: const Icon(Icons.sync),
+                  label: const Text('Load telemetry'),
+                ),
+              ),
+              if (_isAdmin) ...[
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: _openManualEntries,
+                  icon: const Icon(Icons.engineering_outlined),
+                  label: const Text('Manual data'),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInitialState() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: .08)),
+        color: const Color(0xFF0F151E),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            'Pilih meeting untuk mulai',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Masukkan meeting key dan tekan Load telemetry untuk menarik data. '
+            'Gunakan session key bila ingin fokus pada satu sesi.',
+            style: TextStyle(color: Colors.white70),
+          ),
+        ],
+      ),
     );
   }
 
@@ -253,6 +449,10 @@ class _CarListScreenState extends State<CarListScreen> {
     final drsActiveCount = entries.where((e) => e.isDrsActive).length;
     final syncedAt = _lastFetchedAt;
 
+    final meetingLabel =
+        _activeMeetingKey != null ? '#$_activeMeetingKey' : 'Belum dipilih';
+    final sessionLabel = _activeSessionKey?.toString() ?? 'Semua sesi';
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -263,6 +463,11 @@ class _CarListScreenState extends State<CarListScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'Meeting $meetingLabel • Session $sessionLabel',
+            style: const TextStyle(color: Colors.white70),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(child: _buildSummaryTile('Entries', '$total')),
@@ -347,7 +552,7 @@ class _CarListScreenState extends State<CarListScreen> {
           ),
           const SizedBox(height: 12),
           FilledButton(
-            onPressed: _fetchEntries,
+            onPressed: _refreshCurrentQuery,
             child: const Text('Retry'),
           ),
           if (_error != null && _error!.toLowerCase().contains('login'))
@@ -374,7 +579,7 @@ class _CarListScreenState extends State<CarListScreen> {
           Icon(Icons.inbox_outlined, size: 36, color: Colors.white38),
           SizedBox(height: 12),
           Text(
-            'No telemetry entries yet.',
+            'Tidak ada telemetry untuk filter ini.',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
@@ -382,7 +587,7 @@ class _CarListScreenState extends State<CarListScreen> {
           ),
           SizedBox(height: 6),
           Text(
-            'Add entries through SpeedView web admin to populate this list.',
+            'Coba meeting key atau session lain, lalu refresh data di SpeedView web bila perlu.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white60),
           ),
@@ -398,6 +603,18 @@ class _CarListScreenState extends State<CarListScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => CarDetailSheet(entry: entry),
     );
+  }
+
+  void _showInputError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
   }
 }
 

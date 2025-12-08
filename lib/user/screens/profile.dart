@@ -225,13 +225,13 @@ class _ProfilePageState extends State<ProfilePage>
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: _role == 'admin'
-                    ? Colors.red.withValues(alpha: 0.2)
-                    : Colors.blue.withValues(alpha: 0.2),
+                    ? Colors.red.withOpacity(0.2)
+                    : Colors.blue.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(
                   color: _role == 'admin'
-                      ? Colors.red.withValues(alpha: 0.5)
-                      : Colors.blue.withValues(alpha: 0.5),
+                      ? Colors.red.withOpacity(0.5)
+                      : Colors.blue.withOpacity(0.5),
                 ),
               ),
               child: Text(
@@ -360,13 +360,13 @@ class _ProfilePageState extends State<ProfilePage>
                         ),
                         decoration: BoxDecoration(
                           color: _role == 'admin'
-                              ? Colors.red.withValues(alpha: 0.2)
-                              : Colors.blue.withValues(alpha: 0.2),
+                              ? Colors.red.withOpacity(0.2)
+                              : Colors.blue.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _role == 'admin'
-                                ? Colors.red.withValues(alpha: 0.5)
-                                : Colors.blue.withValues(alpha: 0.5),
+                                ? Colors.red.withOpacity(0.5)
+                                : Colors.blue.withOpacity(0.5),
                           ),
                         ),
                         child: Text(
@@ -617,10 +617,10 @@ class _ProfilePageState extends State<ProfilePage>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.red.withValues(alpha: 0.3),
+                      color: Colors.red.withOpacity(0.3),
                     ),
                   ),
                   child: Column(

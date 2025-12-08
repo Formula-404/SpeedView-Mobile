@@ -24,6 +24,7 @@ class AppRoutes {
   static const String drivers = '/drivers';
   static const String teams = '/teams';
   static const String cars = '/cars';
+  static const String carManual = '/cars/manual';
   static const String circuits = '/circuits';
   static const String laps = '/laps';
   static const String pit = '/pit';

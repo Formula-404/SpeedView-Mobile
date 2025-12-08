@@ -5,10 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/navigation/bottom_nav_shell.dart';
 import 'package:speedview/common/screens/coming_soon_screen.dart';
-import 'package:speedview/comparison/screens/comparison_list_screen.dart';
 import 'package:speedview/user/screens/login.dart';
 
 import 'car/screens/car_list_screen.dart';
+import 'car/screens/car_manual_entries_screen.dart';
 import 'meeting/meeting_service.dart';
 import 'meeting/screens/meeting_list_screen.dart';
 import 'session/screens/session_list_screen.dart';
@@ -89,9 +89,9 @@ class SpeedViewApp extends StatelessWidget {
         AppRoutes.meetings: (_) => MeetingListScreen(service: service),
         AppRoutes.sessions: (context) => const SessionListScreen(),
         AppRoutes.circuits: (context) => const CircuitListScreen(),
-        AppRoutes.teams: (_) => const TeamListScreen(),
         AppRoutes.cars: (_) => const CarListScreen(),
-        AppRoutes.comparison: (_) => const ComparisonListScreen(),
+        AppRoutes.carManual: (_) => const CarManualEntriesScreen(),
+        AppRoutes.teams: (_) => const TeamListScreen(),
       },
       onGenerateRoute: (settings) {
         if (placeholderRoutes.contains(settings.name)) {
