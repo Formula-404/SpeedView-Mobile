@@ -100,6 +100,11 @@ class CarDetailSheet extends StatelessWidget {
             _buildMetadataRow('Entry ID', entry.id),
             _buildMetadataRow('Meeting Key', entry.meetingKey?.toString() ?? '-'),
             _buildMetadataRow('Session Key', entry.sessionKey?.toString() ?? '-'),
+            _buildMetadataRow(
+              'Session offset (s)',
+              entry.sessionOffsetSeconds?.toString() ?? '-',
+            ),
+            _buildMetadataRow('Manual entry', entry.isManual ? 'Yes' : 'No'),
             _buildMetadataRow('Created At', _formatDateTime(entry.createdAt)),
             _buildMetadataRow('Updated At', _formatDateTime(entry.updatedAt)),
             const SizedBox(height: 12),

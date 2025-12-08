@@ -204,8 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0),
                         ),
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 16.0),
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
                         elevation: 0,
                       ),
                       child: const Text(
@@ -231,8 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: RichText(
                         text: const TextSpan(
                           text: "Don't have an account? ",
-                          style:
-                              TextStyle(color: Colors.grey, fontSize: 14),
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
                           children: [
                             TextSpan(
                               text: 'Sign up',
