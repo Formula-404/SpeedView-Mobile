@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:speedview/user/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/theme/typography.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
 
@@ -292,18 +293,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Text(
             'SpeedView Mobile',
-            style: TextStyle(
+            style: speedViewHeadingStyle(
+              context,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.2,
-              fontSize: 28,
-              color: Colors.white,
             ),
           ),
-          SizedBox(height: 12),
-          Text(
+          const SizedBox(height: 12),
+          const Text(
             'Dive into Formula 1 data anywhere. Use the menu to jump between meetings, drivers, circuits, and more.',
             style: TextStyle(
               color: Colors.white,

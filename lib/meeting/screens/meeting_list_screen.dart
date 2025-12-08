@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/theme/typography.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
 
@@ -174,11 +175,13 @@ class _MeetingListScreenState extends State<MeetingListScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          'MEETINGS',
-          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: 3,
-              ),
+          'Meetings',
+          style: speedViewHeadingStyle(
+            context,
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 2.4,
+          ),
         ),
         const SizedBox(height: 6),
         Text(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:speedview/common/theme/typography.dart';
+
 class SpeedViewAppBar extends StatelessWidget implements PreferredSizeWidget {
   const SpeedViewAppBar({
     super.key,
@@ -12,13 +14,18 @@ class SpeedViewAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final titleStyle = theme.appBarTheme.titleTextStyle ??
+        speedViewHeadingStyle(
+          context,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.1,
+        );
     return AppBar(
       title: Text(
         title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          letterSpacing: .8,
-        ),
+        style: titleStyle,
       ),
       leading: Builder(
         builder: (context) {

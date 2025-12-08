@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
+import 'package:speedview/common/theme/typography.dart';
 import 'package:speedview/user/constants.dart';
 import 'team_detail_screen.dart';
 import 'team_form_screen.dart';
@@ -212,12 +213,12 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 14),
-                                    const Text(
+                                    Text(
                                       'Teams',
-                                      style: TextStyle(
+                                      style: speedViewHeadingStyle(
+                                        context,
                                         fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
                                   ],
