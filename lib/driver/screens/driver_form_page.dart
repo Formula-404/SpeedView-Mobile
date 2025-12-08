@@ -27,7 +27,7 @@ class _DriverFormPageState extends State<DriverFormPage> {
   late TextEditingController _headshotController;
 
   bool _isSaving = false;
-  static const _baseUrl = 'http://127.0.0.1:8000/driver/api/create/';
+  static const _baseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
 
   @override
   void initState() {
@@ -35,14 +35,10 @@ class _DriverFormPageState extends State<DriverFormPage> {
     final d = widget.existing;
     _numberController =
         TextEditingController(text: d != null ? d.driverNumber.toString() : '');
-    _fullNameController =
-        TextEditingController(text: d?.fullName ?? '');
-    _broadcastController =
-        TextEditingController(text: d?.broadcastName ?? '');
-    _countryController =
-        TextEditingController(text: d?.countryCode ?? '');
-    _headshotController =
-        TextEditingController(text: d?.headshotUrl ?? '');
+    _fullNameController = TextEditingController(text: d?.fullName ?? '');
+    _broadcastController = TextEditingController(text: d?.broadcastName ?? '');
+    _countryController = TextEditingController(text: d?.countryCode ?? '');
+    _headshotController = TextEditingController(text: d?.headshotUrl ?? '');
   }
 
   @override
@@ -74,17 +70,15 @@ class _DriverFormPageState extends State<DriverFormPage> {
     try {
       late final Map<String, dynamic> response;
 
-      if (widget.isEdit) {
-        response = await request.postJson(
-          "$_baseUrl/driver/api/${widget.existing!.driverNumber}/update/",
-          jsonEncode(body),
-        );
-      } else {
-        response = await request.postJson(
-          "$_baseUrl/driver/api/create/",
-          jsonEncode(body),
-        );
-      }
+      // ========= PENTING: pakai endpoint MOBILE + trailing slash =========
+      final String url = widget.isEdit
+          ? "$_baseUrl/driver/api/mobile/${widget.existing!.driverNumber}/update/"
+          : "$_baseUrl/driver/api/mobile/create/";
+
+      response = await request.postJson(
+        url,
+        jsonEncode(body),
+      );
 
       if (response['ok'] == true) {
         if (mounted) {
@@ -98,7 +92,8 @@ class _DriverFormPageState extends State<DriverFormPage> {
               backgroundColor: Colors.green[700],
             ),
           );
-          Navigator.pop(context, true); // true → tandai bahwa data berubah
+          // true → tandai bahwa list perlu di-refresh
+          Navigator.pop(context, true);
         }
       } else {
         final error = response['error'] ??

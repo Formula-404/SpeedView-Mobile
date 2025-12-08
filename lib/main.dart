@@ -4,7 +4,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/navigation/bottom_nav_shell.dart';
-import 'package:speedview/common/navigation/screens/coming_soon_screen.dart';
+import 'package:speedview/common/screens/coming_soon_screen.dart';
 import 'package:speedview/comparison/screens/comparison_list_screen.dart';
 import 'package:speedview/user/screens/login.dart';
 

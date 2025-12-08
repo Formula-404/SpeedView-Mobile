@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +18,8 @@ class PitListPage extends StatefulWidget {
 }
 
 class _PitListPageState extends State<PitListPage> {
-  static const String _baseUrl = 'http://127.0.0.1:8000';
+  static const String _baseUrl =
+      'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
   static const int _pageSize = 20;
 
   final _sessionKeyController = TextEditingController();
@@ -78,18 +78,21 @@ class _PitListPageState extends State<PitListPage> {
 
     final request = context.read<CookieRequest>();
 
-    setState(() {
-      _error = null;
-      if (reset) {
+    if (reset) {
+      setState(() {
+        _error = null;
         _isInitialLoading = true;
         _pits.clear();
         _offset = 0;
         _totalCount = 0;
         _hasMore = true;
-      } else {
+      });
+    } else {
+      setState(() {
+        _error = null;
         _isMoreLoading = true;
-      }
-    });
+      });
+    }
 
     try {
       final filters = _buildFilters();
@@ -104,28 +107,44 @@ class _PitListPageState extends State<PitListPage> {
           .join('&');
 
       final url = '$_baseUrl/pit/api/?$qs';
-      final response = await request.get(url) as Map<String, dynamic>;
+
+      final raw = await request.get(url);
+      if (raw is! Map<String, dynamic>) {
+        throw Exception('Invalid response from server');
+      }
+      final response = raw;
 
       if (response['ok'] != true) {
         throw Exception(response['error'] ?? 'Failed to load pit data');
       }
 
-      final List<dynamic> data = response['data'] ?? [];
-      final List<PitStop> newPits =
-          data.map((e) => PitStop.fromJson(e as Map<String, dynamic>)).toList();
+      final List<dynamic> rawData =
+          (response['data'] as List<dynamic>?) ?? <dynamic>[];
+      final List<PitStop> newPits = rawData
+          .map((e) => PitStop.fromJson(e as Map<String, dynamic>))
+          .toList();
 
       setState(() {
-        _totalCount = (response['count'] ?? _totalCount) as int;
-        _hasMore = response['has_more'] == true;
+        final dynamic c = response['count'];
+        if (c != null) {
+          _totalCount =
+              c is int ? c : int.tryParse(c.toString()) ?? _totalCount;
+        }
+
+        _pits.addAll(newPits);
 
         final dynamic nextOffsetRaw = response['next_offset'];
-        if (nextOffsetRaw is int) {
-          _offset = nextOffsetRaw;
+        if (nextOffsetRaw != null) {
+          _offset = nextOffsetRaw is int
+              ? nextOffsetRaw
+              : int.tryParse(nextOffsetRaw.toString()) ??
+                  (_offset + newPits.length);
         } else {
           _offset += newPits.length;
         }
 
-        _pits.addAll(newPits);
+        final bool serverHasMore = response['has_more'] == true;
+        _hasMore = serverHasMore && newPits.isNotEmpty;
       });
     } catch (e) {
       setState(() {
@@ -133,12 +152,11 @@ class _PitListPageState extends State<PitListPage> {
         _hasMore = false;
       });
     } finally {
-      if (mounted) {
-        setState(() {
-          _isInitialLoading = false;
-          _isMoreLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isInitialLoading = false;
+        _isMoreLoading = false;
+      });
     }
   }
 

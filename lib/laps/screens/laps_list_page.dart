@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +18,8 @@ class LapsListPage extends StatefulWidget {
 }
 
 class _LapsListPageState extends State<LapsListPage> {
-  static const String _baseUrl = 'http://127.0.0.1:8000';
+  static const String _baseUrl =
+      'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
   static const int _pageSize = 20;
 
   final _sessionKeyController = TextEditingController();
@@ -73,23 +73,28 @@ class _LapsListPageState extends State<LapsListPage> {
   }
 
   Future<void> _loadPage({bool reset = false}) async {
+    // cegah double request
     if (_isInitialLoading || _isMoreLoading) return;
+    // kalau bukan reset dan sudah tidak ada data lagi, stop
     if (!reset && !_hasMore) return;
 
     final request = context.read<CookieRequest>();
 
-    setState(() {
-      _error = null;
-      if (reset) {
+    if (reset) {
+      setState(() {
+        _error = null;
         _isInitialLoading = true;
         _laps.clear();
         _offset = 0;
         _totalCount = 0;
         _hasMore = true;
-      } else {
+      });
+    } else {
+      setState(() {
+        _error = null;
         _isMoreLoading = true;
-      }
-    });
+      });
+    }
 
     try {
       final filters = _buildFilters();
@@ -104,28 +109,47 @@ class _LapsListPageState extends State<LapsListPage> {
           .join('&');
 
       final url = '$_baseUrl/laps/api/?$qs';
-      final response = await request.get(url) as Map<String, dynamic>;
+
+      final raw = await request.get(url);
+      if (raw is! Map<String, dynamic>) {
+        throw Exception('Invalid response from server');
+      }
+      final response = raw;
 
       if (response['ok'] != true) {
         throw Exception(response['error'] ?? 'Failed to load laps');
       }
 
-      final List<dynamic> data = response['data'] ?? [];
+      final List<dynamic> rawData =
+          (response['data'] as List<dynamic>?) ?? <dynamic>[];
       final List<Lap> newLaps =
-          data.map((e) => Lap.fromJson(e as Map<String, dynamic>)).toList();
+          rawData.map((e) => Lap.fromJson(e as Map<String, dynamic>)).toList();
 
       setState(() {
-        _totalCount = (response['count'] ?? _totalCount) as int;
-        _hasMore = response['has_more'] == true;
+        // total count (aman kalau dikirim sebagai string)
+        final dynamic c = response['count'];
+        if (c != null) {
+          _totalCount =
+              c is int ? c : int.tryParse(c.toString()) ?? _totalCount;
+        }
 
+        // append data
+        _laps.addAll(newLaps);
+
+        // offset berikutnya
         final dynamic nextOffsetRaw = response['next_offset'];
-        if (nextOffsetRaw is int) {
-          _offset = nextOffsetRaw;
+        if (nextOffsetRaw != null) {
+          _offset = nextOffsetRaw is int
+              ? nextOffsetRaw
+              : int.tryParse(nextOffsetRaw.toString()) ??
+                  (_offset + newLaps.length);
         } else {
           _offset += newLaps.length;
         }
 
-        _laps.addAll(newLaps);
+        final bool serverHasMore = response['has_more'] == true;
+        // kalau server bilang masih ada tapi page ini kosong → paksa berhenti
+        _hasMore = serverHasMore && newLaps.isNotEmpty;
       });
     } catch (e) {
       setState(() {
@@ -133,12 +157,11 @@ class _LapsListPageState extends State<LapsListPage> {
         _hasMore = false;
       });
     } finally {
-      if (mounted) {
-        setState(() {
-          _isInitialLoading = false;
-          _isMoreLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isInitialLoading = false;
+        _isMoreLoading = false;
+      });
     }
   }
 
@@ -396,6 +419,7 @@ class _LapsListPageState extends State<LapsListPage> {
       itemCount: _laps.length + (_hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == _laps.length) {
+          // row loader di paling bawah
           if (!_isMoreLoading && _hasMore) {
             _loadPage(reset: false);
           }
