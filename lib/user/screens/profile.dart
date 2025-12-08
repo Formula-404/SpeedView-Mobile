@@ -1,7 +1,11 @@
+// lib/user/screens/profile.dart
+
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+
 import 'package:speedview/common/constants.dart';
 import 'package:speedview/user/screens/login.dart';
 
@@ -60,18 +64,19 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> _fetchProfile() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.get(buildSpeedViewUrl('/profile-flutter/'));
+      final response =
+          await request.get(buildSpeedViewUrl('/profile-flutter/'));
       if (response['status'] == true) {
         setState(() {
-          _usernameController.text = response['username'];
-          _emailController.text = response['email'];
-          _role = response['role'];
-          _themePreference = response['theme_preference'];
+          _usernameController.text = response['username'] as String;
+          _emailController.text = response['email'] as String;
+          _role = response['role'] as String;
+          _themePreference = response['theme_preference'] as String;
           _isLoading = false;
         });
       } else {
         _showSnackBar(
-          response['message'] ?? 'Failed to load profile',
+          (response['message'] ?? 'Failed to load profile').toString(),
           Colors.red,
         );
       }
@@ -92,12 +97,15 @@ class _ProfilePageState extends State<ProfilePage>
         }),
       );
 
-      if (mounted) {
-        if (response['status'] == true) {
-          _showSnackBar('Profile updated successfully!', Colors.green);
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        _showSnackBar('Profile updated successfully!', Colors.green);
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Failed to update profile').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -116,15 +124,18 @@ class _ProfilePageState extends State<ProfilePage>
         }),
       );
 
-      if (mounted) {
-        if (response['status'] == true) {
-          _showSnackBar('Password changed successfully!', Colors.green);
-          _currentPasswordController.clear();
-          _newPasswordController.clear();
-          _confirmNewPasswordController.clear();
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        _showSnackBar('Password changed successfully!', Colors.green);
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmNewPasswordController.clear();
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Failed to change password').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -142,16 +153,19 @@ class _ProfilePageState extends State<ProfilePage>
         }),
       );
 
-      if (mounted) {
-        if (response['status'] == true) {
-          _showSnackBar('Account deleted successfully', Colors.green);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        _showSnackBar('Account deleted successfully', Colors.green);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Failed to delete account').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -161,19 +175,20 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> _logout() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.post(
-        buildSpeedViewUrl('/logout-flutter/'),
-        {},
-      );
-      if (mounted) {
-        if (response['status'] == true) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        } else {
-          _showSnackBar(response['message'], Colors.red);
-        }
+      final response =
+          await request.post(buildSpeedViewUrl('/logout-flutter/'), {});
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        _showSnackBar(
+          (response['message'] ?? 'Logout failed').toString(),
+          Colors.red,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar('Error: $e', Colors.red);
@@ -181,9 +196,9 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color),
+    );
   }
 
   @override
@@ -191,16 +206,15 @@ class _ProfilePageState extends State<ProfilePage>
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF161B22),
-        body: Center(child: CircularProgressIndicator(color: Colors.red)),
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.red),
+        ),
       );
     }
 
     return Scaffold(
       backgroundColor: const Color(0xFF161B22),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF161B22),
-        iconTheme: const IconThemeData(color: Color(0xFFE6EDF3)),
-        elevation: 0,
         title: Row(
           children: [
             const Text(
@@ -209,28 +223,35 @@ class _ProfilePageState extends State<ProfilePage>
             ),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: (_role == 'admin' ? Colors.red : Colors.blue)
-                    .withOpacity(0.15),
-                borderRadius: BorderRadius.circular(6),
+                color: _role == 'admin'
+                    ? Colors.red.withOpacity(0.2)
+                    : Colors.blue.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(4),
                 border: Border.all(
-                  color: (_role == 'admin' ? Colors.red : Colors.blue)
-                      .withOpacity(0.4),
+                  color: _role == 'admin'
+                      ? Colors.red.withOpacity(0.5)
+                      : Colors.blue.withOpacity(0.5),
                 ),
               ),
               child: Text(
                 _role.toUpperCase(),
                 style: TextStyle(
-                  color:
-                      _role == 'admin' ? Colors.red[400] : Colors.blue[400],
+                  color: _role == 'admin'
+                      ? Colors.red[400]
+                      : Colors.blue[400],
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
                 ),
               ),
             ),
           ],
         ),
+        backgroundColor: const Color(0xFF161B22),
+        iconTheme: const IconThemeData(color: Color(0xFFE6EDF3)),
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.red),
@@ -260,6 +281,8 @@ class _ProfilePageState extends State<ProfilePage>
       ),
     );
   }
+
+  // ============== TAB 1: PROFILE INFO ==============
 
   Widget _buildProfileInfoTab() {
     return SingleChildScrollView(
@@ -293,7 +316,10 @@ class _ProfilePageState extends State<ProfilePage>
                 const SizedBox(height: 8),
                 const Text(
                   'Update your account information',
-                  style: TextStyle(color: Color(0xB3E6EDF3), fontSize: 14),
+                  style: TextStyle(
+                    color: Color(0xB3E6EDF3),
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -363,7 +389,7 @@ class _ProfilePageState extends State<ProfilePage>
                 ),
                 const SizedBox(height: 24),
 
-                // Form Fields
+                // Username
                 _buildLabel('Username'),
                 TextField(
                   controller: _usernameController,
@@ -372,6 +398,7 @@ class _ProfilePageState extends State<ProfilePage>
                 ),
                 const SizedBox(height: 16),
 
+                // Email
                 _buildLabel('Email address'),
                 TextField(
                   controller: _emailController,
@@ -380,6 +407,7 @@ class _ProfilePageState extends State<ProfilePage>
                 ),
                 const SizedBox(height: 16),
 
+                // Theme Preference
                 _buildLabel('Theme Preference'),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -395,8 +423,14 @@ class _ProfilePageState extends State<ProfilePage>
                       isExpanded: true,
                       style: const TextStyle(color: Color(0xFFE6EDF3)),
                       items: const [
-                        DropdownMenuItem(value: 'light', child: Text('Light')),
-                        DropdownMenuItem(value: 'dark', child: Text('Dark')),
+                        DropdownMenuItem(
+                          value: 'light',
+                          child: Text('Light'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'dark',
+                          child: Text('Dark'),
+                        ),
                       ],
                       onChanged: (value) {
                         setState(() {
@@ -437,6 +471,8 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
+  // ============== TAB 2: CHANGE PASSWORD ==============
+
   Widget _buildChangePasswordTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -469,7 +505,10 @@ class _ProfilePageState extends State<ProfilePage>
                 const SizedBox(height: 8),
                 const Text(
                   'Update your password to keep your account secure',
-                  style: TextStyle(color: Color(0xB3E6EDF3), fontSize: 14),
+                  style: TextStyle(
+                    color: Color(0xB3E6EDF3),
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -489,7 +528,9 @@ class _ProfilePageState extends State<ProfilePage>
                   controller: _newPasswordController,
                   obscureText: true,
                   style: const TextStyle(color: Color(0xFFE6EDF3)),
-                  decoration: _buildInputDecoration('Enter your new password'),
+                  decoration: _buildInputDecoration(
+                    'Enter your new password',
+                  ),
                 ),
                 const Padding(
                   padding: EdgeInsets.only(top: 4.0),
@@ -540,6 +581,8 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
+  // ============== TAB 3: DANGER ZONE ==============
+
   Widget _buildDangerZoneTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -572,7 +615,10 @@ class _ProfilePageState extends State<ProfilePage>
                 const SizedBox(height: 8),
                 const Text(
                   'Permanently delete your account and all associated data',
-                  style: TextStyle(color: Color(0xB3E6EDF3), fontSize: 14),
+                  style: TextStyle(
+                    color: Color(0xB3E6EDF3),
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -589,13 +635,13 @@ class _ProfilePageState extends State<ProfilePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        children: [
-                          const Icon(
+                        children: const [
+                          Icon(
                             Icons.warning_amber_rounded,
                             color: Colors.red,
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
+                          SizedBox(width: 8),
+                          Text(
                             'Delete Account',
                             style: TextStyle(
                               color: Colors.red,
@@ -616,7 +662,8 @@ class _ProfilePageState extends State<ProfilePage>
                       TextField(
                         controller: _deletePasswordController,
                         obscureText: true,
-                        style: const TextStyle(color: Color(0xFFE6EDF3)),
+                        style:
+                            const TextStyle(color: Color(0xFFE6EDF3)),
                         decoration: _buildInputDecoration(
                           'Enter your password to confirm',
                         ),
@@ -626,7 +673,8 @@ class _ProfilePageState extends State<ProfilePage>
                       _buildLabel("Type 'DELETE' to confirm"),
                       TextField(
                         controller: _deleteConfirmController,
-                        style: const TextStyle(color: Color(0xFFE6EDF3)),
+                        style:
+                            const TextStyle(color: Color(0xFFE6EDF3)),
                         decoration: _buildInputDecoration(
                           'Type DELETE in capital letters',
                         ),
@@ -665,6 +713,8 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
+  // ============== UTIL WIDGETS ==============
+
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -685,7 +735,8 @@ class _ProfilePageState extends State<ProfilePage>
       fillColor: const Color(0xFF161B22),
       hintText: hint,
       hintStyle: TextStyle(color: Colors.grey[600]),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: Colors.white24),

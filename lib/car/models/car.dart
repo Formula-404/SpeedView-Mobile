@@ -15,6 +15,8 @@ class CarTelemetryEntry {
     this.drsState,
     this.createdAt,
     this.updatedAt,
+    this.sessionOffsetSeconds,
+    this.isManual = false,
   });
 
   factory CarTelemetryEntry.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,8 @@ class CarTelemetryEntry {
       drsState: json['drs_state'] as String?,
       createdAt: _parseDate(json['created_at']),
       updatedAt: _parseDate(json['updated_at']),
+      sessionOffsetSeconds: _parseInt(json['session_offset_seconds']),
+      isManual: _parseBool(json['is_manual']),
     );
   }
 
@@ -52,6 +56,8 @@ class CarTelemetryEntry {
   final String? drsState;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final int? sessionOffsetSeconds;
+  final bool isManual;
 
   String get driverLabel => '#$driverNumber';
 
@@ -81,4 +87,14 @@ DateTime? _parseDate(dynamic value) {
     return DateTime.tryParse(value);
   }
   return null;
+}
+
+bool _parseBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    final normalized = value.toLowerCase();
+    return normalized == 'true' || normalized == '1' || normalized == 'yes';
+  }
+  return false;
 }

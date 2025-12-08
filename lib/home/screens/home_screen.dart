@@ -1,19 +1,20 @@
 // lib/home/screens/home_screen.dart
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+
+import 'package:speedview/common/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
 
-// override tujuan tombol tertentu
+// Override tujuan tombol tertentu
 import 'package:speedview/driver/screens/driver_list_page.dart';
 import 'package:speedview/laps/screens/laps_list_page.dart';
 import 'package:speedview/pit/screens/pit_list_page.dart';
-import 'package:speedview/user/screens/profile.dart';
-
-import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:provider/provider.dart';
 import 'package:speedview/user/screens/login.dart';
+import 'package:speedview/user/screens/profile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +26,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _username = 'User';
   String _role = 'User';
-  final String _baseUrl = "http://127.0.0.1:8000";
 
   @override
   void initState() {
@@ -36,42 +36,48 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchProfile() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.get("$_baseUrl/profile-flutter/");
+      final response =
+          await request.get(buildSpeedViewUrl('/profile-flutter/'));
       if (response['status'] == true) {
-        if (mounted) {
-          setState(() {
-            _username = response['username'];
-            _role = response['role'];
-          });
-        }
+        if (!mounted) return;
+        setState(() {
+          _username = response['username'] as String;
+          _role = response['role'] as String;
+        });
       }
-    } catch (e) {
-      // Silent error or retry
+    } catch (_) {
+      // Silent error; bisa ditambah logging kalau perlu
     }
   }
 
   Future<void> _logout() async {
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.post("$_baseUrl/logout-flutter/", {});
-      if (mounted) {
-        if (response['status'] == true) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response['message']), backgroundColor: Colors.red),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
+      final response =
+          await request.post(buildSpeedViewUrl('/logout-flutter/'), {});
+      if (!mounted) return;
+
+      if (response['status'] == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text((response['message'] ?? 'Logout failed').toString()),
+            backgroundColor: Colors.red,
+          ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -94,13 +100,16 @@ class _HomeScreenState extends State<HomeScreen> {
               if (value == 'profile') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
                 );
               } else if (value == 'logout') {
                 _logout();
               }
             },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            itemBuilder: (BuildContext context) =>
+                <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
                 enabled: false,
                 child: Column(
@@ -116,16 +125,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: _role == 'admin' ? Colors.red.withValues(alpha: 0.2) : Colors.blue.withValues(alpha: 0.2),
+                        color: _role == 'admin'
+                            ? Colors.red.withValues(alpha: 0.2)
+                            : Colors.blue.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: _role == 'admin' ? Colors.red.withValues(alpha: 0.5) : Colors.blue.withValues(alpha: 0.5)),
+                        border: Border.all(
+                          color: _role == 'admin'
+                              ? Colors.red.withValues(alpha: 0.5)
+                              : Colors.blue.withValues(alpha: 0.5),
+                        ),
                       ),
                       child: Text(
                         _role.toUpperCase(),
                         style: TextStyle(
-                          color: _role == 'admin' ? Colors.red[400] : Colors.blue[400],
+                          color: _role == 'admin'
+                              ? Colors.red[400]
+                              : Colors.blue[400],
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -180,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 .map(
                   (destination) => GestureDetector(
                     onTap: () {
-                      // ⬇️ Khusus beberapa kartu, kita arahkan ke halaman Flutter custom
+                      // Beberapa kartu diarahkan ke halaman khusus Flutter
                       if (destination.title == 'Drivers') {
                         Navigator.push(
                           context,
@@ -204,14 +224,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       } else if (destination.title == 'Profile') {
-                         Navigator.push(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const ProfilePage(),
                           ),
                         );
                       } else {
-                        // yang lain tetap pakai routing lama
+                        // Yang lain pakai routing biasa
                         Navigator.of(context)
                             .pushReplacementNamed(destination.route);
                       }
@@ -222,8 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color:
-                              Colors.white.withValues(alpha: .08),
+                          color: Colors.white.withValues(alpha: .08),
                         ),
                         color: const Color(0xFF0F151E),
                       ),
@@ -279,16 +298,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: const [
           Text(
             'SpeedView Mobile',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              fontSize: 28,
+              color: Colors.white,
+            ),
           ),
-          const SizedBox(height: 12),
-          const Text(
+          SizedBox(height: 12),
+          Text(
             'Dive into Formula 1 data anywhere. Use the menu to jump between meetings, drivers, circuits, and more.',
             style: TextStyle(
               color: Colors.white,

@@ -24,13 +24,14 @@ class AppRoutes {
   static const String drivers = '/drivers';
   static const String teams = '/teams';
   static const String cars = '/cars';
+  static const String carManual = '/cars/manual';
   static const String circuits = '/circuits';
   static const String laps = '/laps';
   static const String pit = '/pit';
 
-  // alias biar baris:
+  // alias biar:
   // drawer: SpeedViewDrawer(currentRoute: AppRoutes.pitStops)
-  // bisa jalan tanpa ngubah file lain
+  // tetap jalan
   static const String pitStops = pit;
 
   static const String comparison = '/comparison';
@@ -70,7 +71,7 @@ class AppRoutes {
       title: 'Drivers',
       icon: Icons.sports_motorsports_outlined,
       description: 'Driver stats & profiles',
-      implemented: true, // sudah ada DriverListPage
+      implemented: true,
     ),
     DrawerDestination(
       route: teams,
@@ -91,34 +92,28 @@ class AppRoutes {
       title: 'Circuits',
       icon: Icons.route_outlined,
       description: 'Track layouts & metadata',
-      implemented: true, // modul circuits sudah jalan
+      implemented: true,
     ),
     DrawerDestination(
       route: laps,
       title: 'Laps',
       icon: Icons.speed_outlined,
       description: 'Lap-by-lap analytics',
-      implemented: true, // LapsListPage
+      implemented: true,
     ),
     DrawerDestination(
       route: pit,
       title: 'Pit Stops',
       icon: Icons.build_outlined,
       description: 'Strategy and timing',
-      implemented: true, // PitListPage
+      implemented: true,
     ),
+
     DrawerDestination(
       route: comparison,
       title: 'Comparison',
       icon: Icons.compare_arrows_outlined,
       description: 'Head-to-head insights',
-      implemented: true,
-    ),
-    DrawerDestination(
-      route: user,
-      title: 'Profile',
-      icon: Icons.person_outline,
-      description: 'Account & preferences',
       implemented: true,
     ),
   ];
