@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -73,8 +74,8 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
     };
 
     try {
-      final response = await request.post(url, data);
-
+      final response = await request.postJson(url, jsonEncode(data));
+      print("Response dari Server: $response");
       if (context.mounted) {
          if (response['ok'] == true) {
              Navigator.pop(context, true);
@@ -82,12 +83,14 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
                 SnackBar(content: Text(response['message'] ?? "Success"), backgroundColor: Colors.green),
              );
          } else {
-             ScaffoldMessenger.of(context).showSnackBar(
+            String errorMessage = response['message'] ?? response['error'] ?? "Unknown failure";
+            ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(response['error'] ?? "Failed"), backgroundColor: Colors.red),
              );
          }
       }
     } catch (e) {
+      print("Error submitting form: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
