@@ -156,7 +156,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
     try {
       final response = await request.post(
-        buildSpeedViewUrl('/team/api/${Uri.encodeComponent(teamName)}/delete/'), 
+        buildSpeedViewUrl('/team/api/mobile/${Uri.encodeComponent(teamName)}/delete/'), 
         {}
       );
 
