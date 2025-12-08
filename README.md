@@ -74,7 +74,7 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
   <tr>
     <td><b>Meeting</b></td>
     <td>Represents a Grand Prix weekend (e.g., Monaco GP 2025)</td>
-    <td>Putri</td>
+    <td>Naila</td>
   </tr>
   <tr>
     <td><b>Session</b></td>
