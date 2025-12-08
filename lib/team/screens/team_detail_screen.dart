@@ -1,19 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
+import 'package:speedview/user/constants.dart';
+import 'team_form_screen.dart';
 import '../models/team.dart';
-
-const String _hostBase =
-    'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
-const String _apiDetailBase = '$_hostBase/team/api/';
-
-String teamDetailUrl(String teamName) =>
-    '$_apiDetailBase${Uri.encodeComponent(teamName)}/';
-
-String teamDeleteUrl(String teamName) =>
-    '$_apiDetailBase${Uri.encodeComponent(teamName)}/delete/';
 
 class TeamDetailScreen extends StatefulWidget {
   final String teamName;
@@ -38,7 +29,9 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTeam();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTeam();
+    });
   }
 
   Future<void> _loadTeam() async {
@@ -47,19 +40,18 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       _error = null;
     });
 
+    final request = context.read<CookieRequest>();
+
     try {
-      final res = await http.get(Uri.parse(teamDetailUrl(widget.teamName)));
+      final response = await request.get(
+        buildSpeedViewUrl('/team/api/${Uri.encodeComponent(widget.teamName)}/')
+      );
 
-      if (res.statusCode != 200) {
-        throw Exception('Status ${res.statusCode}: ${res.reasonPhrase}');
+      if (response['ok'] != true) {
+        throw Exception(response['error'] ?? 'Failed to load team');
       }
 
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      if (body['ok'] != true) {
-        throw Exception(body['error'] ?? 'Failed to load team');
-      }
-
-      final data = body['data'] as Map<String, dynamic>;
+      final data = response['data'] as Map<String, dynamic>;
       final team = Team.fromJson(data);
 
       if (!mounted) return;
@@ -159,25 +151,23 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       _deleting = true;
     });
 
+    final request = context.read<CookieRequest>();
     String? error;
 
     try {
-      final res = await http.delete(Uri.parse(teamDeleteUrl(teamName)));
+      final response = await request.post(
+        buildSpeedViewUrl('/team/api/${Uri.encodeComponent(teamName)}/delete/'), 
+        {}
+      );
 
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        if (!mounted) return;
+      if (response['ok'] == true) {
+         if (!mounted) return;
         Navigator.of(context).pop(true);
         return;
       }
+      
+      error = response['error'] ?? 'Failed to delete team.';
 
-      Map<String, dynamic>? body;
-      try {
-        body = jsonDecode(res.body) as Map<String, dynamic>;
-      } catch (_) {
-        body = null;
-      }
-      error = body?['error'] ??
-          'Failed to delete team (status ${res.statusCode}).';
     } catch (e) {
       error = 'Network error while deleting: $e';
     }
@@ -227,6 +217,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     );
   }
 
+
   Widget _buildDetail(BuildContext context, Team team) {
     final primaryColor = _parseHexColor(team.teamColourHex.isNotEmpty
         ? team.teamColourHex
@@ -265,7 +256,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Back button row
                   Row(
                     children: [
                       InkWell(
@@ -291,7 +281,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                   const SizedBox(height: 14),
 
-                  // Team name heading
                   Text(
                     team.teamName.isNotEmpty ? team.teamName : widget.teamName,
                     style: const TextStyle(
@@ -302,7 +291,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Hero card
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
@@ -487,11 +475,9 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // About & Engines
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Engines
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -556,7 +542,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
                       const SizedBox(height: 12),
 
-                      // About (full width)
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -595,7 +580,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Career Stats
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -652,7 +636,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Performance
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -710,7 +693,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Meta
                   Text(
                     'Created: ${_fmtDate(team.createdAt)} • Updated: ${_fmtDate(team.updatedAt)}',
                     style: const TextStyle(
@@ -805,55 +787,50 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
   Widget _buildAdminButtons(Team team) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        // EDIT – navigation to your edit screen
         InkWell(
-          onTap: () {
-            // TODO: navigate to edit_team screen, e.g.:
-            // Navigator.pushNamed(context, '/teams/edit', arguments: team);
+          borderRadius: BorderRadius.circular(8),
+          onTap: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TeamFormScreen(team: team),
+              ),
+            );
+            if (result == true) {
+              _loadTeam();
+            }
           },
-          borderRadius: BorderRadius.circular(10),
           child: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withOpacity(0.12)),
+              color: Colors.white.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
             ),
             child: const Icon(
-              Icons.edit_outlined,
-              size: 18,
-              color: Colors.white,
+              Icons.edit,
+              size: 16,
+              color: Colors.blueAccent,
             ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
         InkWell(
-          onTap: _deleting ? null : _confirmDelete,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
+          onTap: _confirmDelete,
           child: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withOpacity(0.12)),
+              color: const Color(0x26EF4444),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0x66EF4444)),
             ),
-            child: _deleting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Color(0xFFEF4444)),
-                    ),
-                  )
-                : const Icon(
-                    Icons.delete_outline,
-                    size: 18,
-                    color: Colors.white,
-                  ),
+            child: const Icon(
+              Icons.delete,
+              size: 16,
+              color: Color(0xFFEF4444),
+            ),
           ),
         ),
       ],
@@ -861,26 +838,28 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   }
 
   Widget _linkChip({required String label, required String url}) {
-    return InkWell(
-      onTap: () {
-        // You can integrate url_launcher here.
-        // await launchUrl(Uri.parse(url));
-      },
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xCCFFFFFF),
+    // TODO: Launch URL
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.link, size: 12, color: Colors.blue),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.blue,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -894,37 +873,41 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       child: Row(
         children: [
           Container(
-            width: 22,
-            height: 22,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: color == Colors.transparent
                   ? Colors.transparent
                   : color,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white.withOpacity(0.15)),
             ),
           ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Color(0x99FFFFFF),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0x99FFFFFF),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Courier',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -933,12 +916,12 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
   Widget _statCard({required String label, required String value}) {
     return Container(
-      width: 150, // allows Wrap to lay out nicely
+      width: (MediaQuery.of(context).size.width - 48 - 20) / 2, 
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -950,13 +933,13 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
               color: Color(0x99FFFFFF),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             value,
             style: const TextStyle(
               fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -978,42 +961,50 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Failed to load team data',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Team: $teamName\n$error',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFFE11D48),
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onRetry,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Color(0xFFEF4444)),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load "$teamName"',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-            child: const Text('Retry'),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0x99FFFFFF),
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: onRetry,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Try Again'),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Go Back'),
+            ),
+          ],
+        ),
       ),
     );
   }

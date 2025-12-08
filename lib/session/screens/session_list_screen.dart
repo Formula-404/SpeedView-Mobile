@@ -40,7 +40,7 @@ class _SessionListScreenState extends State<SessionListScreen> {
     });
 
     final request = context.read<CookieRequest>();
-    String baseUrl = 'http://127.0.0.1:8000'; 
+    String baseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id'; 
     String endpoint = '$baseUrl/session/api/?page=$page&q=$query';
 
     try {
