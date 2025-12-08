@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/theme/typography.dart';
 import 'package:speedview/driver/screens/driver_list_page.dart';
 import 'package:speedview/laps/screens/laps_list_page.dart';
 import 'package:speedview/pit/screens/pit_list_page.dart';
@@ -18,7 +19,7 @@ class SpeedViewDrawer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const Divider(color: Color(0x22FFFFFF)),
             Expanded(
               child: ListView.builder(
@@ -109,27 +110,33 @@ class SpeedViewDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.all(20.0),
+  Widget _buildHeader(BuildContext context) {
+    final subtitleStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Colors.white70,
+          fontWeight: FontWeight.w500,
+        ) ??
+        const TextStyle(
+          color: Colors.white70,
+          fontWeight: FontWeight.w500,
+        );
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'SpeedView',
-            style: TextStyle(
+            style: speedViewHeadingStyle(
+              context,
               fontSize: 24,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.2,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
             'Formula 1 insights hub',
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: FontWeight.w500,
-            ),
+            style: subtitleStyle,
           ),
         ],
       ),

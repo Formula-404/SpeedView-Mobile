@@ -3,6 +3,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:speedview/common/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/theme/typography.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
 
@@ -70,7 +71,7 @@ class _CarListScreenState extends State<CarListScreen> {
     final request = context.read<CookieRequest>();
     if (!request.loggedIn) {
       setState(() {
-        _error = 'Silakan login untuk melihat data mobil.';
+        _error = 'Please log in to view car data.';
         _entries.clear();
         _loading = false;
         _isAdmin = false;
@@ -122,7 +123,7 @@ class _CarListScreenState extends State<CarListScreen> {
     final meetingText = _meetingKeyController.text.trim();
     final meetingKey = int.tryParse(meetingText);
     if (meetingKey == null) {
-      _showInputError('Meeting key harus berupa angka.');
+      _showInputError('Meeting key must be a number.');
       return;
     }
 
@@ -131,7 +132,7 @@ class _CarListScreenState extends State<CarListScreen> {
     if (sessionText.isNotEmpty) {
       sessionKey = int.tryParse(sessionText);
       if (sessionKey == null) {
-        _showInputError('Session key harus berupa angka.');
+        _showInputError('Session key must be a number.');
         return;
       }
     }
@@ -216,7 +217,7 @@ class _CarListScreenState extends State<CarListScreen> {
             ),
             padding: const EdgeInsets.all(20),
             children: [
-              _buildHeader(),
+              _buildHeader(context),
               const SizedBox(height: 20),
               _buildFilterCard(),
               const SizedBox(height: 20),
@@ -229,7 +230,7 @@ class _CarListScreenState extends State<CarListScreen> {
                 const SizedBox(height: 12),
               ],
               if (!_hasRequestedData && !_loading)
-                _buildInitialState(),
+              _buildInitialState(),
               if (_loading) _buildLoadingState(),
               if (!_loading && _error != null) _buildErrorState(),
               if (_hasRequestedData && !_loading && _error == null && _filteredEntries.isEmpty)
@@ -249,7 +250,16 @@ class _CarListScreenState extends State<CarListScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final breadcrumbStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Colors.white.withValues(alpha: .6),
+        ) ??
+        TextStyle(color: Colors.white.withValues(alpha: .6));
+    final breadcrumbActive = Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ) ??
+        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -258,34 +268,30 @@ class _CarListScreenState extends State<CarListScreen> {
             GestureDetector(
               onTap: () =>
                   Navigator.of(context).pushReplacementNamed(AppRoutes.home),
-              child: Text(
-                'Home',
-                style: TextStyle(color: Colors.white.withValues(alpha: .6)),
-              ),
+              child: Text('Home', style: breadcrumbStyle),
             ),
             const SizedBox(width: 6),
             const Icon(Icons.chevron_right, color: Colors.white54, size: 18),
             const SizedBox(width: 6),
-            const Text(
-              'Car Telemetry',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text('Car Telemetry', style: breadcrumbActive),
           ],
         ),
         const SizedBox(height: 8),
         Text(
           'Car Telemetry Explorer',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: speedViewHeadingStyle(
+            context,
+            fontSize: 30,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.4,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
-          'Masukkan meeting key untuk menarik telemetry terbaru per driver.',
-          style: const TextStyle(color: Colors.white70),
+          'Enter a meeting key to fetch telemetry data.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white70,
+              ),
         ),
       ],
     );
@@ -314,7 +320,7 @@ class _CarListScreenState extends State<CarListScreen> {
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Meeting key',
-              hintText: 'mis. 1219',
+              hintText: 'e.g. 1219',
               filled: true,
               fillColor: Color(0xFF0F151E),
             ),
@@ -324,8 +330,8 @@ class _CarListScreenState extends State<CarListScreen> {
             controller: _sessionKeyController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Session key (opsional)',
-              hintText: 'mis. 9493',
+              labelText: 'Session key (optional)',
+              hintText: 'e.g. 9493',
               filled: true,
               fillColor: Color(0xFF0F151E),
             ),
@@ -367,7 +373,7 @@ class _CarListScreenState extends State<CarListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
           Text(
-            'Pilih meeting untuk mulai',
+            'Choose a meeting to begin',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -375,8 +381,8 @@ class _CarListScreenState extends State<CarListScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'Masukkan meeting key dan tekan Load telemetry untuk menarik data. '
-            'Gunakan session key bila ingin fokus pada satu sesi.',
+            'Enter a meeting key then tap "Load telemetry" to fetch data. '
+            'Use a session key if you want to focus on a single session.',
             style: TextStyle(color: Colors.white70),
           ),
         ],
@@ -450,8 +456,8 @@ class _CarListScreenState extends State<CarListScreen> {
     final syncedAt = _lastFetchedAt;
 
     final meetingLabel =
-        _activeMeetingKey != null ? '#$_activeMeetingKey' : 'Belum dipilih';
-    final sessionLabel = _activeSessionKey?.toString() ?? 'Semua sesi';
+        _activeMeetingKey != null ? '#$_activeMeetingKey' : 'Not selected';
+    final sessionLabel = _activeSessionKey?.toString() ?? 'All sessions';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -579,7 +585,7 @@ class _CarListScreenState extends State<CarListScreen> {
           Icon(Icons.inbox_outlined, size: 36, color: Colors.white38),
           SizedBox(height: 12),
           Text(
-            'Tidak ada telemetry untuk filter ini.',
+            'No telemetry for this filter.',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
@@ -587,7 +593,7 @@ class _CarListScreenState extends State<CarListScreen> {
           ),
           SizedBox(height: 6),
           Text(
-            'Coba meeting key atau session lain, lalu refresh data di SpeedView web bila perlu.',
+            'Try another meeting key or session, then refresh the data on SpeedView web if needed.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white60),
           ),

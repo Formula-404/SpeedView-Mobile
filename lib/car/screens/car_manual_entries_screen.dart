@@ -3,6 +3,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:speedview/common/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/theme/typography.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
 
@@ -271,6 +272,15 @@ class _CarManualEntriesScreenState extends State<CarManualEntriesScreen> {
   }
 
   Widget _buildHeader() {
+    final breadcrumbStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Colors.white.withValues(alpha: .6),
+        ) ??
+        TextStyle(color: Colors.white.withValues(alpha: .6));
+    final breadcrumbActive = Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ) ??
+        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -279,29 +289,34 @@ class _CarManualEntriesScreenState extends State<CarManualEntriesScreen> {
             GestureDetector(
               onTap: () =>
                   Navigator.of(context).pushReplacementNamed(AppRoutes.home),
-              child: Text(
-                'Home',
-                style: TextStyle(color: Colors.white.withValues(alpha: .6)),
-              ),
+              child: Text('Home', style: breadcrumbStyle),
             ),
             const SizedBox(width: 6),
             const Icon(Icons.chevron_right, color: Colors.white54, size: 18),
             const SizedBox(width: 6),
             Text(
               _isAdmin ? 'Manual Data' : 'Manual Data (locked)',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: breadcrumbActive,
             ),
           ],
         ),
         const SizedBox(height: 12),
         Text(
+          _isAdmin ? 'Manual Data' : 'Manual Data (locked)',
+          style: speedViewHeadingStyle(
+            context,
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
           _isAdmin
               ? 'Manage manual telemetry entries that sync to SpeedView web admin.'
               : 'Only admins can view and edit manual telemetry entries.',
-          style: const TextStyle(color: Colors.white70),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white70,
+              ),
         ),
       ],
     );

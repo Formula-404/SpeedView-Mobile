@@ -1,4 +1,3 @@
-// lib/driver/screens/driver_list_page.dart
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -33,7 +32,7 @@ class _DriverListPageState extends State<DriverListPage> {
   String? _errorMessage;
   bool _isAdmin = false;
 
-  static const _baseUrl = 'http://127.0.0.1:8000';
+  static const _baseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
 
   @override
   void initState() {
@@ -68,7 +67,8 @@ class _DriverListPageState extends State<DriverListPage> {
 
     final request = context.read<CookieRequest>();
     try {
-      final response = await request.get("$_baseUrl/driver/api/");
+      // gunakan endpoint mobile
+      final response = await request.get("$_baseUrl/driver/api/mobile/");
       if (response['ok'] != true) {
         throw Exception(response['error'] ?? 'Failed to load drivers');
       }
@@ -144,8 +144,9 @@ class _DriverListPageState extends State<DriverListPage> {
   Future<void> _deleteDriver(Driver driver) async {
     final request = context.read<CookieRequest>();
     try {
+      // endpoint delete mobile
       final response = await request.postJson(
-        "$_baseUrl/driver/api/${driver.driverNumber}/delete/",
+        "$_baseUrl/driver/api/mobile/${driver.driverNumber}/delete/",
         jsonEncode(<String, String>{}),
       );
 
@@ -362,7 +363,8 @@ class _DriverListPageState extends State<DriverListPage> {
   Widget _buildBackRow(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(999),
-      onTap: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+      onTap: () =>
+          Navigator.of(context).pushReplacementNamed(AppRoutes.home),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
