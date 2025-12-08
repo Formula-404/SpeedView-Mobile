@@ -134,8 +134,8 @@ class _TeamFormScreenState extends State<TeamFormScreen> {
 
     final url = isEdit
         ? buildSpeedViewUrl(
-            '/team/api/${Uri.encodeComponent(widget.team!.teamName)}/update/')
-        : buildSpeedViewUrl('/team/api/create/');
+            '/team/api/mobile/${Uri.encodeComponent(widget.team!.teamName)}/edit/')
+        : buildSpeedViewUrl('/team/api/mobile/create/');
 
     try {
       final body = {
