@@ -199,7 +199,7 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
 </p>
 
 
-# Nama Aplikasi Kamu
+# SpeedView
 [![Build Status](https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411/status.svg?token=Lhlk8sE6wcDJapbFOzoHQg&branch=master)](https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411)
 
 ## Download
