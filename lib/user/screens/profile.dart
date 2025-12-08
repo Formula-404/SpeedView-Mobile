@@ -1,12 +1,10 @@
-// lib/user/screens/profile.dart
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
-import 'package:speedview/common/constants.dart';
+import 'package:speedview/user/constants.dart';
 import 'package:speedview/user/screens/login.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -282,8 +280,6 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  // ============== TAB 1: PROFILE INFO ==============
-
   Widget _buildProfileInfoTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -471,8 +467,6 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  // ============== TAB 2: CHANGE PASSWORD ==============
-
   Widget _buildChangePasswordTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -580,8 +574,6 @@ class _ProfilePageState extends State<ProfilePage>
       ),
     );
   }
-
-  // ============== TAB 3: DANGER ZONE ==============
 
   Widget _buildDangerZoneTab() {
     return SingleChildScrollView(
@@ -712,8 +704,6 @@ class _ProfilePageState extends State<ProfilePage>
       ),
     );
   }
-
-  // ============== UTIL WIDGETS ==============
 
   Widget _buildLabel(String text) {
     return Padding(

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -53,7 +54,7 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
     final request = context.read<CookieRequest>();
     final isEdit = widget.circuit != null;
     
-    final baseUrl = "http://127.0.0.1:8000"; 
+    final baseUrl = "https://helven-marcia-speedview.pbp.cs.ui.ac.id"; 
     final url = isEdit 
         ? '$baseUrl/circuit/api/${widget.circuit!.id}/update/'
         : '$baseUrl/circuit/api/create/';
@@ -73,8 +74,7 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
     };
 
     try {
-      final response = await request.post(url, data);
-
+      final response = await request.postJson(url, jsonEncode(data));
       if (context.mounted) {
          if (response['ok'] == true) {
              Navigator.pop(context, true);
@@ -82,7 +82,7 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
                 SnackBar(content: Text(response['message'] ?? "Success"), backgroundColor: Colors.green),
              );
          } else {
-             ScaffoldMessenger.of(context).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(response['error'] ?? "Failed"), backgroundColor: Colors.red),
              );
          }

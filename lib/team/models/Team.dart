@@ -61,7 +61,6 @@ class Team {
     required this.detailUrl,
   });
 
-  // ---------- helpers ----------
   static int _asInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;
@@ -90,7 +89,6 @@ class Team {
     return null;
   }
 
-  // ---------- fromJson / toJson ----------
   factory Team.fromJson(Map<String, dynamic> json) {
     return Team(
       teamName: json['team_name'] ?? '',

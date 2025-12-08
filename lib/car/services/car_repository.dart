@@ -1,5 +1,5 @@
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:speedview/common/constants.dart';
+import 'package:speedview/user/constants.dart';
 
 import '../models/car.dart';
 

@@ -81,7 +81,7 @@ class MeetingInfo {
   });
 
   factory MeetingInfo.fromJson(Map<String, dynamic> json) => MeetingInfo(
-    meetingKey: json['meeting_key'],
+    meetingKey: json['meeting_key'] ?? 0,
     meetingName: json['meeting_name'],
     circuitShortName: json['circuit_short_name'],
     countryName: json['country_name'],
@@ -103,9 +103,9 @@ class Session {
   });
 
   factory Session.fromJson(Map<String, dynamic> json) => Session(
-    sessionKey: json['session_key'],
-    sessionName: json['session_name'],
+    sessionKey: json['session_key'] ?? 0,
+    sessionName: json['session_name'] ?? "Unknown Session",
     dateStart: json['date_start'] != null ? DateTime.parse(json['date_start']) : null,
-    dateStartStr: json['date_start_str'],
+    dateStartStr: json['date_start_str'] ?? "N/A",
   );
 }

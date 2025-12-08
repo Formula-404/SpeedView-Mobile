@@ -1,15 +1,12 @@
-// lib/home/screens/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
-import 'package:speedview/common/constants.dart';
+import 'package:speedview/user/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
 
-// Override tujuan tombol tertentu
 import 'package:speedview/driver/screens/driver_list_page.dart';
 import 'package:speedview/laps/screens/laps_list_page.dart';
 import 'package:speedview/pit/screens/pit_list_page.dart';
@@ -46,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (_) {
-      // Silent error; bisa ditambah logging kalau perlu
     }
   }
 
@@ -200,7 +196,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 .map(
                   (destination) => GestureDetector(
                     onTap: () {
-                      // Beberapa kartu diarahkan ke halaman khusus Flutter
                       if (destination.title == 'Drivers') {
                         Navigator.push(
                           context,
@@ -231,7 +226,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       } else {
-                        // Yang lain pakai routing biasa
                         Navigator.of(context)
                             .pushReplacementNamed(destination.route);
                       }
