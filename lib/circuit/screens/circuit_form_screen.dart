@@ -194,10 +194,18 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
       child: TextFormField(
         controller: controller,
         style: const TextStyle(color: Colors.white),
-        keyboardType: isNumber ? TextInputType.number : (isUrl ? TextInputType.url : TextInputType.text),
+        keyboardType: isNumber 
+            ? const TextInputType.numberWithOptions(decimal: true) 
+            : (isUrl ? TextInputType.url : TextInputType.text),
         validator: (value) {
           if (required && (value == null || value.trim().isEmpty)) {
             return '$label is required';
+          }
+          if (isNumber && value != null && value.isNotEmpty) {
+            final n = num.tryParse(value);
+            if (n == null) {
+              return 'Invalid number';
+            }
           }
           return null;
         },
@@ -212,6 +220,9 @@ class _CircuitFormScreenState extends State<CircuitFormScreen> {
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white10)),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFFB4D46))),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
+          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.redAccent)),
+          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.redAccent)),
         ),
       ),
     );
