@@ -197,3 +197,10 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
         <img src="https://img.shields.io/badge/Figma-Design%20Mockups-purple?style=for-the-badge&logo=figma&logoColor=white" alt="Figma Project"/>
     </a>
 </p>
+
+
+# Nama Aplikasi Kamu
+[![Build Status](https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411/status.svg?token=Lhlk8sE6wcDJapbFOzoHQg&branch=master)](https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411)
+
+## Download
+Download aplikasi versi terbaru: [Download APK] (https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411/installable-artifacts/fe3d8c1969ed88c5/public-install-page/768e86867434ae638fef40a4cd50c0b8)
