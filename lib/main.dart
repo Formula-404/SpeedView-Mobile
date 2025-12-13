@@ -6,6 +6,7 @@ import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/navigation/bottom_nav_shell.dart';
 import 'package:speedview/common/screens/coming_soon_screen.dart';
 import 'package:speedview/common/theme/typography.dart';
+import 'package:speedview/common/widgets/auth_guard.dart';
 import 'package:speedview/user/screens/login.dart';
 
 import 'car/screens/car_list_screen.dart';
@@ -88,17 +89,17 @@ class SpeedViewApp extends StatelessWidget {
       routes: {
         AppRoutes.login: (_) => const LoginPage(),
         AppRoutes.home: (_) =>
-            const BottomNavigationShell(initialRoute: AppRoutes.home),
+            const AuthGuard(child: BottomNavigationShell(initialRoute: AppRoutes.home)),
         AppRoutes.comparison: (_) =>
-            const BottomNavigationShell(initialRoute: AppRoutes.comparison),
+            const AuthGuard(child: BottomNavigationShell(initialRoute: AppRoutes.comparison)),
         AppRoutes.user: (_) =>
-            const BottomNavigationShell(initialRoute: AppRoutes.user),
-        AppRoutes.meetings: (_) => MeetingListScreen(service: service),
-        AppRoutes.sessions: (context) => const SessionListScreen(),
-        AppRoutes.circuits: (context) => const CircuitListScreen(),
-        AppRoutes.cars: (_) => const CarListScreen(),
-        AppRoutes.carManual: (_) => const CarManualEntriesScreen(),
-        AppRoutes.teams: (_) => const TeamListScreen(),
+            const AuthGuard(child: BottomNavigationShell(initialRoute: AppRoutes.user)),
+        AppRoutes.meetings: (_) => AuthGuard(child: MeetingListScreen(service: service)),
+        AppRoutes.sessions: (context) => const AuthGuard(child: SessionListScreen()),
+        AppRoutes.circuits: (context) => const AuthGuard(child: CircuitListScreen()),
+        AppRoutes.cars: (_) => const AuthGuard(child: CarListScreen()),
+        AppRoutes.carManual: (_) => const AuthGuard(child: CarManualEntriesScreen()),
+        AppRoutes.teams: (_) => const AuthGuard(child: TeamListScreen()),
       },
       onGenerateRoute: (settings) {
         if (placeholderRoutes.contains(settings.name)) {
