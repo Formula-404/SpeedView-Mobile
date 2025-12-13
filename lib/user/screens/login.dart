@@ -116,8 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
-                        'assets/images/speedview_logo.png',
+                      Image.network(
+                        'https://i.imgur.com/30t6yrY.png',
                         height: 120,
                       ),
                       const SizedBox(height: 16),
