@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import 'package:speedview/user/constants.dart';
 import '../models/Comparison.dart';
@@ -767,32 +768,14 @@ class _OverviewSection extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    _infoRow('Founded', t.foundedYear?.toString() ?? '—'),
-                    _infoRow(
-                      'Engines',
-                      t.engines.isNotEmpty ? t.engines : '—',
-                    ),
-                    _infoRow(
-                      'Website',
-                      t.website.isNotEmpty ? 'Visit' : '—',
-                      isLink: t.website.isNotEmpty,
-                    ),
-                    _infoRow(
-                      'Races entered',
-                      t.racesEntered?.toString() ?? '—',
-                    ),
-                    _infoRow(
-                      'Wins',
-                      t.raceVictories?.toString() ?? '—',
-                    ),
-                    _infoRow(
-                      'Podiums',
-                      t.podiums?.toString() ?? '—',
-                    ),
-                    _infoRow(
-                      'Points',
-                      t.points?.toString() ?? '—',
-                    ),
+                    _infoRow(context, 'Founded', t.foundedYear?.toString() ?? '—'),
+                    _infoRow(context, 'Engines', t.engines.isNotEmpty ? t.engines : '—'),
+                    _infoRow(context, 'Website', t.website, isLink: t.website.isNotEmpty),
+                    _infoRow(context, 'Wikipedia', t.wikiUrl, isLink: t.wikiUrl.isNotEmpty),
+                    _infoRow(context, 'Races entered', t.racesEntered?.toString() ?? '—'),
+                    _infoRow(context, 'Wins', t.raceVictories?.toString() ?? '—'),
+                    _infoRow(context, 'Podiums', t.podiums?.toString() ?? '—'),
+                    _infoRow(context, 'Points', t.points?.toString() ?? '—'),
                   ],
                 ),
               );
@@ -817,16 +800,34 @@ class _OverviewSection extends StatelessWidget {
     );
   }
 
-  static Widget _infoRow(String label, String value, {bool isLink = false}) {
+  static void _copyToClipboard(BuildContext context, String url) async {
+    final text = url.trim();
+    if (text.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: text));
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('URL copied to clipboard'),
+        backgroundColor: Colors.blue,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  static Widget _infoRow(BuildContext context, String label, String value, {bool isLink = false}) {
+    final displayValue = isLink ? 'Copy URL' : (value.isNotEmpty ? value : '—');
+
     final valueStyle = TextStyle(
       color: isLink ? const Color(0xFFEF4444) : const Color(0xFFE6EDF3),
       fontSize: 13,
-      decoration:
-          isLink ? TextDecoration.underline : TextDecoration.none,
+      decoration: isLink ? TextDecoration.underline : TextDecoration.none,
+      fontWeight: isLink ? FontWeight.w600 : FontWeight.normal,
     );
 
     final content = Text(
-      value,
+      displayValue,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: valueStyle,
@@ -850,9 +851,7 @@ class _OverviewSection extends StatelessWidget {
           Expanded(
             child: isLink
                 ? InkWell(
-                    onTap: () {
-                      // integrate url_launcher later
-                    },
+                    onTap: () => _copyToClipboard(context, value),
                     child: content,
                   )
                 : content,
