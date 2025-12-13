@@ -17,6 +17,104 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister(CookieRequest request) async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+    final email = _emailController.text.trim();
+
+    List<String> errors = [];
+
+    if (username.isEmpty) {
+      errors.add('Username is required');
+    } else if (username.length < 3) {
+      errors.add('Username must be at least 3 characters');
+    }
+
+    if (email.isEmpty) {
+      errors.add('Email is required');
+    } else if (!email.contains('@') || !email.contains('.')) {
+      errors.add('Please enter a valid email address');
+    }
+
+    if (password.isEmpty) {
+      errors.add('Password is required');
+    } else if (password.length < 8) {
+      errors.add('Password must be at least 8 characters');
+    }
+
+    if (password != confirmPassword) {
+      errors.add('Passwords do not match');
+    }
+
+    if (errors.isNotEmpty) {
+      _showErrorDialog(errors.join('\n'));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await request.postJson(
+        buildSpeedViewUrl('/register-flutter/'),
+        jsonEncode(<String, String>{
+          'username': username,
+          'password': password,
+          'email': email,
+        }),
+      );
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (response['status'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration successful! Please login.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        final message = response['message']?.toString() ?? 'Registration failed';
+        _showErrorDialog(message);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      _showErrorDialog('Unable to connect to server. Please check your internet connection.');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Registration Failed'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +139,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.speed,
-                      size: 64,
-                      color: Colors.black,
+                    Image.asset(
+                      'assets/images/speedview_logo.png',
+                      height: 120,
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -67,9 +164,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextField(
                       controller: _usernameController,
                       style: const TextStyle(color: Colors.black),
+                      enabled: !_isLoading,
                       decoration: InputDecoration(
                         labelText: 'Username',
-                        hintText: 'Choose a username',
+                        hintText: 'Choose a username (min 3 characters)',
                         labelStyle: const TextStyle(color: Colors.black54),
                         hintStyle: const TextStyle(color: Colors.black38),
                         enabledBorder: OutlineInputBorder(
@@ -92,6 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextField(
                       controller: _emailController,
                       style: const TextStyle(color: Colors.black),
+                      enabled: !_isLoading,
                       decoration: InputDecoration(
                         labelText: 'Email',
                         hintText: 'Enter your email',
@@ -117,9 +216,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextField(
                       controller: _passwordController,
                       style: const TextStyle(color: Colors.black),
+                      enabled: !_isLoading,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        hintText: 'Create a password',
+                        hintText: 'Min 8 characters',
                         labelStyle: const TextStyle(color: Colors.black54),
                         hintStyle: const TextStyle(color: Colors.black38),
                         enabledBorder: OutlineInputBorder(
@@ -143,6 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextField(
                       controller: _confirmPasswordController,
                       style: const TextStyle(color: Colors.black),
+                      enabled: !_isLoading,
                       decoration: InputDecoration(
                         labelText: 'Confirm Password',
                         hintText: 'Confirm your password',
@@ -166,79 +267,46 @@ class _RegisterPageState extends State<RegisterPage> {
                       obscureText: true,
                     ),
                     const SizedBox(height: 32.0),
-                    ElevatedButton(
-                      onPressed: () async {
-                        String username = _usernameController.text;
-                        String password = _passwordController.text;
-                        String confirmPassword = _confirmPasswordController.text;
-                        String email = _emailController.text;
-
-                        if (password != confirmPassword) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Passwords do not match!"),
-                              backgroundColor: Colors.red,
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: () => _handleRegister(request),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 50),
+                              backgroundColor: const Color(0xFF111827),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              elevation: 0,
                             ),
-                          );
-                          return;
-                        }
-
-                        final response = await request.postJson(
-                          buildSpeedViewUrl('/register-flutter/'),
-                          jsonEncode(<String, String>{
-                            'username': username,
-                            'password': password,
-                            'email': email,
-                          }),
-                        );
-
-                        if (response['status'] == true) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Registration successful! Please login."),
-                                backgroundColor: Colors.green,
+                            child: const Text(
+                              'Sign up',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                    const SizedBox(height: 24.0),
+                    GestureDetector(
+                      onTap: _isLoading
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                            },
+                      child: RichText(
+                        text: const TextSpan(
+                          text: 'Already have an account? ',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                          children: [
+                            TextSpan(
+                              text: 'Sign in',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const LoginPage()),
-                            );
-                          }
-                        } else {
-                          if (context.mounted) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Registration Failed'),
-                                content: Text(response['message']),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('OK'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: const Color(0xFF111827),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ],
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Sign up',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -251,3 +319,4 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+
