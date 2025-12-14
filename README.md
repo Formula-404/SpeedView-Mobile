@@ -203,4 +203,4 @@ Tujuannya adalah mengubah **data balapan yang tadinya monoton dan teknis** menja
 [![Build Status](https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411/status.svg?token=Lhlk8sE6wcDJapbFOzoHQg&branch=master)](https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411)
 
 ## Download
-Download aplikasi versi terbaru: [Download APK] (https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411/installable-artifacts/fe3d8c1969ed88c5/public-install-page/768e86867434ae638fef40a4cd50c0b8)
+Download aplikasi versi terbaru: [Download APK] (https://app.bitrise.io/app/db0f2725-cf0c-4d3f-8e04-ef03c6798411/installable-artifacts/f8e329eb7af2b774/public-install-page/3b2d4cca7094259f8852b0b2b49c6d7d)
