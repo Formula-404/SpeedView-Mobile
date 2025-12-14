@@ -88,8 +88,9 @@ class SpeedViewApp extends StatelessWidget {
             ),
           ),
         ),
-        home: SplashScreen(service: service),
+        initialRoute: '/splash',
         routes: {
+          '/splash': (_) => SplashScreen(service: service),
           AppRoutes.login: (_) => const LoginPage(),
           AppRoutes.home: (_) =>
               const AuthGuard(child: BottomNavigationShell(initialRoute: AppRoutes.home)),
