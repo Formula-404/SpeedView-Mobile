@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
+import 'package:speedview/common/services/auth_service.dart';
 import 'package:speedview/user/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
 import 'package:speedview/common/theme/typography.dart';
@@ -151,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _logout() async {
     final request = context.read<CookieRequest>();
     try {
+      await AuthService.clearCredentials();
       final response = await request.post(buildSpeedViewUrl('/logout-flutter/'), {});
       if (!mounted) return;
       if (response['status'] == true) {
