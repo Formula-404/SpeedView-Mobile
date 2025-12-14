@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
+import 'package:speedview/common/services/auth_service.dart';
 import 'package:speedview/user/constants.dart';
 import 'package:speedview/user/screens/login.dart';
 
@@ -173,6 +174,7 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> _logout() async {
     final request = context.read<CookieRequest>();
     try {
+      await AuthService.clearCredentials();
       final response =
           await request.post(buildSpeedViewUrl('/logout-flutter/'), {});
       if (!mounted) return;

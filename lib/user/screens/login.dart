@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:speedview/user/constants.dart';
 import 'package:speedview/common/navigation/app_routes.dart';
+import 'package:speedview/common/services/auth_service.dart';
 import 'package:speedview/user/screens/register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -50,6 +51,8 @@ class _LoginPageState extends State<LoginPage> {
 
       if (request.loggedIn) {
         final uname = response['username'] as String;
+
+        await AuthService.saveCredentials(username, password);
 
         Navigator.pushReplacementNamed(
           context,
