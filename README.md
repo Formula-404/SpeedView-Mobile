@@ -120,10 +120,6 @@ Melalui SpeedView, pengguna dapat:
 
 ## Peran Pengguna
 
-### Guest
-
-Pengguna tanpa autentikasi yang hanya dapat mengakses data dalam mode *hanya-baca*.
-
 ### Pengguna Terdaftar
 
 Pengguna yang telah masuk ke sistem dan memiliki kemampuan untuk:
