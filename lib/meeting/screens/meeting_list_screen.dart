@@ -156,40 +156,45 @@ class _MeetingListScreenState extends State<MeetingListScreen> {
       children: [
         Row(
           children: [
-            GestureDetector(
-              onTap: () =>
-                  Navigator.of(context).pushReplacementNamed(AppRoutes.home),
-              child: Text(
-                'Home',
-                style: TextStyle(color: Colors.white.withValues(alpha: .6)),
+            InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withValues(alpha: .1)),
+                ),
+                child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
               ),
             ),
-            const SizedBox(width: 6),
-            const Icon(Icons.chevron_right, color: Colors.white60, size: 18),
-            const SizedBox(width: 6),
-            const Text(
-              'Meetings',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Meetings',
+                    style: speedViewHeadingStyle(
+                      context,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Explore every Formula 1 weekend',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white70,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        Text(
-          'Meetings',
-          style: speedViewHeadingStyle(
-            context,
-            fontSize: 34,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 2.4,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Explore every Formula 1 weekend with the exact data served on SpeedView Web.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
-              ),
-        )
       ],
     );
   }

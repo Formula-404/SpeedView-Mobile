@@ -157,7 +157,7 @@ class _CircuitListScreenState extends State<CircuitListScreen> {
                     children: [
                       // Back
                       InkWell(
-                        onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.home),
+                        onTap: () => Navigator.of(context).pop(),
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           padding: const EdgeInsets.all(12),

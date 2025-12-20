@@ -139,6 +139,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAutoLogin() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
     final credentials = await AuthService.getSavedCredentials();
 
     if (!mounted) return;
@@ -156,11 +158,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
         if (!mounted) return;
 
-        if (request.loggedIn) {
+        final loginSuccess = request.loggedIn || 
+            response['status'] == true || 
+            response['username'] != null;
+
+        if (loginSuccess) {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
           return;
         }
-      } catch (_) {}
+      } catch (_) {
+        await AuthService.clearCredentials();
+      }
     }
 
     if (!mounted) return;

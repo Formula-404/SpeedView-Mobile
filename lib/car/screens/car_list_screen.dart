@@ -266,8 +266,7 @@ class _CarListScreenState extends State<CarListScreen> {
         Row(
           children: [
             GestureDetector(
-              onTap: () =>
-                  Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+              onTap: () => Navigator.of(context).pop(),
               child: Text('Home', style: breadcrumbStyle),
             ),
             const SizedBox(width: 6),

@@ -194,11 +194,7 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                           borderRadius:
                                               BorderRadius.circular(10),
                                           onTap: () {
-                                            Navigator.of(context)
-                                                .pushNamedAndRemoveUntil(
-                                              '/',
-                                              (route) => false,
-                                            );
+                                            Navigator.of(context).pop();
                                           },
                                           child: Container(
                                             padding: const EdgeInsets.all(6),

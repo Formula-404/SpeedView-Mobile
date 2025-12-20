@@ -98,7 +98,7 @@ class _SessionListScreenState extends State<SessionListScreen> {
                       // Back
                       InkWell(
                         onTap: () {
-                          Navigator.pushReplacementNamed(context, AppRoutes.home);
+                          Navigator.of(context).pop();
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
