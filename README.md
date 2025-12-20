@@ -120,10 +120,6 @@ Melalui SpeedView, pengguna dapat:
 
 ## Peran Pengguna
 
-### Guest
-
-Pengguna tanpa autentikasi yang hanya dapat mengakses data dalam mode *hanya-baca*.
-
 ### Pengguna Terdaftar
 
 Pengguna yang telah masuk ke sistem dan memiliki kemampuan untuk:
@@ -204,7 +200,7 @@ Hak akses pengguna disinkronkan antara backend dan aplikasi mobile. Setiap opera
 Unduh aplikasi versi terbaru melalui tautan berikut:
 
 <p align="left">
-  <a href="https://app.bitrise.io/app/01e70d89-e788-4193-b052-607f36aca7e6/installable-artifacts/daa4c36025b18593/public-install-page/860fbd95ca597231d3ffe571e5850bbd">
+  <a href="https://app.bitrise.io/app/01e70d89-e788-4193-b052-607f36aca7e6/installable-artifacts/fede3c30f71dbfd7/public-install-page/f0000c97859a2a45b1d2696485102e0e">
     <img src="https://img.shields.io/badge/Android-SpeedView-androidgreen?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
   </a>
 </p>
