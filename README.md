@@ -192,6 +192,12 @@ Hak akses pengguna disinkronkan antara backend dan aplikasi mobile. Setiap opera
     <img src="https://img.shields.io/badge/Figma-Desain%20Antarmuka-purple?style=for-the-badge&logo=figma&logoColor=white" alt="Figma"/>
   </a>
 </p>
+Link alternatif:
+<p align="left">
+  <a href="https://www.figma.com/design/hJGXw1ko660dWMX8qjTOzV/SpeedViewMobile?node-id=23-404&t=YH8FV1l7583KxjCO-1">
+    <img src="https://img.shields.io/badge/Figma-Desain%20Antarmuka-purple?style=for-the-badge&logo=figma&logoColor=white" alt="Figma"/>
+  </a>
+</p>
 
 ---
 
