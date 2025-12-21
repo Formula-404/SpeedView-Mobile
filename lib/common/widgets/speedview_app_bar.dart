@@ -14,23 +14,21 @@ class SpeedViewAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final titleStyle = theme.appBarTheme.titleTextStyle ??
-        speedViewHeadingStyle(
+    return AppBar(
+      title: Text(
+        title,
+        style: speedViewHeadingStyle(
           context,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.1,
-        );
-    return AppBar(
-      title: Text(
-        title,
-        style: titleStyle,
+          color: Colors.white,
+        ),
       ),
       leading: Builder(
         builder: (context) {
           return IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           );
         },

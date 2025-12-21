@@ -16,7 +16,7 @@ TextStyle speedViewHeadingStyle(
     fontFamily: speedViewHeadingFontFamily,
     fontSize: fontSize ?? base.fontSize,
     fontWeight: fontWeight ?? base.fontWeight,
-    color: color ?? base.color ?? Colors.white,
+    color: color ?? Colors.white,
     letterSpacing: letterSpacing ?? 1.1,
   );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
+import 'package:flutter/services.dart';
 import 'package:speedview/user/constants.dart';
 import 'team_form_screen.dart';
 import '../models/team.dart';
@@ -156,7 +157,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
     try {
       final response = await request.post(
-        buildSpeedViewUrl('/team/api/${Uri.encodeComponent(teamName)}/delete/'), 
+        buildSpeedViewUrl('/team/api/mobile/${Uri.encodeComponent(teamName)}/delete/'), 
         {}
       );
 
@@ -376,21 +377,15 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 10),
-                                    Row(
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         if (team.website.isNotEmpty)
-                                          _linkChip(
-                                            label: 'Website',
-                                            url: team.website,
-                                          ),
-                                        if (team.website.isNotEmpty &&
-                                            team.wikiUrl.isNotEmpty)
-                                          const SizedBox(width: 8),
+                                          _copyableUrlRow(label: 'Website', url: team.website),
+                                        if (team.website.isNotEmpty && team.wikiUrl.isNotEmpty)
+                                          const SizedBox(height: 10),
                                         if (team.wikiUrl.isNotEmpty)
-                                          _linkChip(
-                                            label: 'Wikipedia',
-                                            url: team.wikiUrl,
-                                          ),
+                                          _copyableUrlRow(label: 'Wikipedia', url: team.wikiUrl),
                                       ],
                                     ),
                                   ],
@@ -943,6 +938,70 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _copyableUrlRow({
+    required String label,
+    required String url,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () async {
+        final text = url.trim();
+        if (text.isEmpty) return;
+
+        await Clipboard.setData(ClipboardData(text: text));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('URL copied to clipboard'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0x99FFFFFF),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            SelectableText(
+              url,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.blueAccent,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            const SizedBox(height: 2),
+            const Text(
+              'Tap to copy',
+              style: TextStyle(
+                fontSize: 10,
+                color: Color(0x66FFFFFF),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

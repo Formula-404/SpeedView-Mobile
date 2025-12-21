@@ -97,17 +97,10 @@ class _ComparisonCreateScreenState extends State<ComparisonCreateScreen> {
     }
 
     try {
-      final uri = Uri.parse('${widget.apiBaseUrl}$path');
-      final res = await http.get(
-        uri,
-        headers: const {'Accept': 'application/json'},
-      );
+      final request = context.read<CookieRequest>();
+      final url = '${widget.apiBaseUrl}$path';
+      final body = await request.get(url);
 
-      if (res.statusCode != 200) {
-        throw Exception('Failed with status ${res.statusCode}');
-      }
-
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (body['ok'] != true) {
         throw Exception(body['error'] ?? 'Failed to load items');
       }
