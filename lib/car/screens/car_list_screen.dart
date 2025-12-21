@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,7 @@ import 'package:speedview/common/widgets/speedview_app_bar.dart';
 import 'package:speedview/common/widgets/speedview_drawer.dart';
 
 import '../models/car.dart';
+import '../models/car_driver_session_group.dart';
 import '../services/car_repository.dart';
 import '../widgets/dart.dart';
 
@@ -33,6 +35,7 @@ class _CarListScreenState extends State<CarListScreen> {
   bool _hasRequestedData = false;
   int? _activeMeetingKey;
   int? _activeSessionKey;
+  final Set<String> _expandedGroups = <String>{};
 
   @override
   void initState() {
@@ -76,6 +79,7 @@ class _CarListScreenState extends State<CarListScreen> {
         _loading = false;
         _isAdmin = false;
         _hasRequestedData = true;
+        _expandedGroups.clear();
       });
       return;
     }
@@ -92,15 +96,22 @@ class _CarListScreenState extends State<CarListScreen> {
         meetingKey: meetingKey,
         sessionKey: sessionKey,
       );
+      final manualEntries = await _fetchManualTelemetryForMeeting(
+        repository: repo,
+        meetingKey: meetingKey,
+        sessionKey: sessionKey,
+      );
+      final mergedEntries = _mergeEntries(results, manualEntries);
       if (!mounted) return;
       setState(() {
         _entries
           ..clear()
-          ..addAll(results);
+          ..addAll(mergedEntries);
         _lastFetchedAt = DateTime.now();
         _loading = false;
         _activeMeetingKey = meetingKey;
         _activeSessionKey = sessionKey;
+        _expandedGroups.clear();
       });
     } on CarRepositoryException catch (e) {
       if (!mounted) return;
@@ -108,6 +119,7 @@ class _CarListScreenState extends State<CarListScreen> {
         _error = e.message;
         _entries.clear();
         _loading = false;
+        _expandedGroups.clear();
       });
     } catch (e) {
       if (!mounted) return;
@@ -115,6 +127,7 @@ class _CarListScreenState extends State<CarListScreen> {
         _error = e.toString();
         _entries.clear();
         _loading = false;
+        _expandedGroups.clear();
       });
     }
   }
@@ -187,21 +200,15 @@ class _CarListScreenState extends State<CarListScreen> {
     }
   }
 
-  List<CarTelemetryEntry> get _filteredEntries {
-    final query = _searchController.text.trim().toLowerCase();
-    return _entries.where((entry) {
-      final matchesQuery = query.isEmpty || _matchesQuery(entry, query);
-      final matchesFilter = switch (_drsFilter) {
-        CarDrsFilter.all => true,
-        CarDrsFilter.active => entry.isDrsActive,
-        CarDrsFilter.inactive => !entry.isDrsActive,
-      };
-      return matchesQuery && matchesFilter;
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final searchQuery = _CarSearchQuery.fromRaw(_searchController.text);
+    final sessionGroups = _hasRequestedData
+        ? _buildSessionGroups(searchQuery)
+        : const <CarSessionGroup>[];
+    final hasRenderableGroups =
+        _hasRequestedData && !_loading && _error == null && sessionGroups.isNotEmpty;
+
     return Scaffold(
       drawer: const SpeedViewDrawer(currentRoute: AppRoutes.cars),
       appBar: const SpeedViewAppBar(title: 'Car Telemetry'),
@@ -226,22 +233,16 @@ class _CarListScreenState extends State<CarListScreen> {
                 const SizedBox(height: 12),
                 _buildDrsFilters(),
                 const SizedBox(height: 20),
-                _buildSummary(),
+                _buildSummary(sessionGroups),
                 const SizedBox(height: 12),
               ],
               if (!_hasRequestedData && !_loading)
               _buildInitialState(),
               if (_loading) _buildLoadingState(),
               if (!_loading && _error != null) _buildErrorState(),
-              if (_hasRequestedData && !_loading && _error == null && _filteredEntries.isEmpty)
+              if (_hasRequestedData && !_loading && _error == null && sessionGroups.isEmpty)
                 _buildEmptyState(),
-              if (_hasRequestedData && !_loading && _error == null && _filteredEntries.isNotEmpty)
-                ..._filteredEntries.map(
-                  (entry) => CarTelemetryCard(
-                    entry: entry,
-                    onTap: () => _showDetail(entry),
-                  ),
-                ),
+              if (hasRenderableGroups) ..._buildSessionSections(sessionGroups),
               const SizedBox(height: 24),
             ],
           ),
@@ -402,7 +403,7 @@ class _CarListScreenState extends State<CarListScreen> {
         controller: _searchController,
         decoration: const InputDecoration(
           icon: Icon(Icons.search, color: Colors.white70),
-          hintText: 'Search by driver, meeting, session, or DRS...',
+          hintText: 'Use session#9493 or driver#44 to filter results...',
           border: InputBorder.none,
         ),
       ),
@@ -442,22 +443,30 @@ class _CarListScreenState extends State<CarListScreen> {
     );
   }
 
-  Widget _buildSummary() {
-    final entries = _filteredEntries;
-    final total = entries.length;
-    final speedSamples = entries.where((entry) => entry.speed != null).toList();
-    final avgSpeed = speedSamples.isEmpty
-        ? 0
-        : speedSamples
-                .map((entry) => entry.speed!)
-                .fold<int>(0, (a, b) => a + b) ~/
-            speedSamples.length;
-    final drsActiveCount = entries.where((e) => e.isDrsActive).length;
+  Widget _buildSummary(List<CarSessionGroup> sessionGroups) {
+    final sessionCount = sessionGroups.length;
+    final driverCount = sessionGroups.fold<int>(
+      0,
+      (total, session) => total + session.driverGroups.length,
+    );
+    final allEntries = sessionGroups
+        .expand((session) => session.driverGroups)
+        .expand((group) => group.entries)
+        .toList();
+    final totalSamples = allEntries.length;
+    final avgSpeed =
+        _averageInt(allEntries.map((entry) => entry.speed));
+    final drsActiveCount = allEntries.where((entry) => entry.isDrsActive).length;
     final syncedAt = _lastFetchedAt;
 
     final meetingLabel =
         _activeMeetingKey != null ? '#$_activeMeetingKey' : 'Not selected';
     final sessionLabel = _activeSessionKey?.toString() ?? 'All sessions';
+    final avgSpeedLabel =
+        avgSpeed != null ? '${avgSpeed.round()} km/h' : '—';
+    final drsShare = totalSamples == 0
+        ? 'DRS active: —'
+        : 'DRS active: ${(drsActiveCount / totalSamples * 100).round()}%';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -476,17 +485,24 @@ class _CarListScreenState extends State<CarListScreen> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildSummaryTile('Entries', '$total')),
-              const SizedBox(width: 16),
-              Expanded(child: _buildSummaryTile('Avg speed', '$avgSpeed km/h')),
+              Expanded(child: _buildSummaryTile('Sessions', '$sessionCount')),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildSummaryTile('DRS active', '$drsActiveCount'),
+                child: _buildSummaryTile('Driver profiles', '$driverCount'),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildSummaryTile('Telemetry samples', '$totalSamples'),
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Text(
+            'Avg speed: $avgSpeedLabel • $drsShare',
+            style: const TextStyle(color: Colors.white54, fontSize: 12),
+          ),
           if (syncedAt != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               'Last sync: ${_formatTimestamp(syncedAt)}',
               style: const TextStyle(color: Colors.white54, fontSize: 12),
@@ -515,6 +531,190 @@ class _CarListScreenState extends State<CarListScreen> {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildSessionSections(List<CarSessionGroup> sessions) {
+    return sessions
+        .map(
+          (session) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSessionHeader(session),
+              const SizedBox(height: 12),
+              ...session.driverGroups.map((group) {
+                final id = group.id;
+                return CarDriverSessionCard(
+                  group: group,
+                  expanded: _expandedGroups.contains(id),
+                  onToggle: () => _toggleGroup(id),
+                  onEntryTap: _showDetail,
+                );
+              }),
+              const SizedBox(height: 20),
+            ],
+          ),
+        )
+        .toList();
+  }
+
+  Widget _buildSessionHeader(CarSessionGroup session) {
+    final theme = Theme.of(context);
+    final driverCount = session.driverGroups.length;
+    final driverLabel =
+        driverCount == 1 ? '1 driver' : '$driverCount drivers';
+    final keyLabel =
+        session.sessionKey != null ? '#${session.sessionKey}' : 'No key';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          session.sessionLabel,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Session key $keyLabel • $driverLabel',
+          style:
+              theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+        ),
+      ],
+    );
+  }
+
+  void _toggleGroup(String id) {
+    setState(() {
+      if (_expandedGroups.contains(id)) {
+        _expandedGroups.remove(id);
+      } else {
+        _expandedGroups.add(id);
+      }
+    });
+  }
+
+  Future<List<CarTelemetryEntry>> _fetchManualTelemetryForMeeting({
+    required CarRepository repository,
+    required int meetingKey,
+    int? sessionKey,
+  }) async {
+    try {
+      final manualEntries = await repository.fetchManualEntries(limit: 500);
+      return manualEntries.where((entry) {
+        final matchesMeeting = entry.meetingKey == meetingKey ||
+            (entry.meetingKey == null &&
+                sessionKey != null &&
+                entry.sessionKey == sessionKey);
+        final matchesSession =
+            sessionKey == null || entry.sessionKey == sessionKey;
+        return matchesMeeting && matchesSession;
+      }).toList();
+    } on CarRepositoryException catch (e) {
+      debugPrint('Manual telemetry fetch failed: ${e.message}');
+      return const [];
+    } catch (e) {
+      debugPrint('Manual telemetry fetch failed: $e');
+      return const [];
+    }
+  }
+
+  List<CarTelemetryEntry> _mergeEntries(
+    List<CarTelemetryEntry> primary,
+    List<CarTelemetryEntry> manual,
+  ) {
+    final merged = <String, CarTelemetryEntry>{};
+    for (final entry in primary) {
+      merged[entry.id] = entry;
+    }
+    for (final entry in manual) {
+      merged[entry.id] = entry;
+    }
+    final list = merged.values.toList();
+    list.sort((a, b) {
+      final aSession = a.sessionKey ?? 0;
+      final bSession = b.sessionKey ?? 0;
+      final sessionCompare = bSession.compareTo(aSession);
+      if (sessionCompare != 0) return sessionCompare;
+      final aDate = a.date?.millisecondsSinceEpoch ?? 0;
+      final bDate = b.date?.millisecondsSinceEpoch ?? 0;
+      return bDate.compareTo(aDate);
+    });
+    return list;
+  }
+
+  List<CarSessionGroup> _buildSessionGroups(_CarSearchQuery query) {
+    final filteredEntries =
+        _entries.where(_matchesDrsFilter).toList();
+    final sessionMap = <int?, Map<int, List<CarTelemetryEntry>>>{};
+
+    for (final entry in filteredEntries) {
+      final driverMap = sessionMap.putIfAbsent(
+        entry.sessionKey,
+        () => <int, List<CarTelemetryEntry>>{},
+      );
+      final driverEntries = driverMap.putIfAbsent(
+        entry.driverNumber,
+        () => <CarTelemetryEntry>[],
+      );
+      driverEntries.add(entry);
+    }
+
+    final sessions = <CarSessionGroup>[];
+    sessionMap.forEach((sessionKey, driverMap) {
+      final driverGroups = <CarDriverSessionGroup>[];
+      driverMap.forEach((driverNumber, entries) {
+        if (entries.isEmpty) return;
+        final sortedEntries = List<CarTelemetryEntry>.from(entries)
+          ..sort((a, b) {
+            final aTime = a.date?.millisecondsSinceEpoch ?? 0;
+            final bTime = b.date?.millisecondsSinceEpoch ?? 0;
+            return bTime.compareTo(aTime);
+          });
+        final first = sortedEntries.first;
+        final group = CarDriverSessionGroup(
+          sessionKey: first.sessionKey,
+          sessionName: first.sessionName,
+          driverNumber: driverNumber,
+          entries: sortedEntries,
+        );
+        if (query.matches(group)) {
+          driverGroups.add(group);
+        }
+      });
+      driverGroups.sort((a, b) => a.driverNumber.compareTo(b.driverNumber));
+      if (driverGroups.isNotEmpty) {
+        final sessionNameCandidate = driverGroups.firstWhere(
+          (group) => group.sessionName != null && group.sessionName!.isNotEmpty,
+          orElse: () => driverGroups.first,
+        );
+        sessions.add(
+          CarSessionGroup(
+            sessionKey: sessionKey,
+            sessionName: sessionNameCandidate.sessionName,
+            driverGroups: driverGroups,
+          ),
+        );
+      }
+    });
+
+    sessions.sort((a, b) {
+      final aKey = a.sessionKey ?? 0;
+      final bKey = b.sessionKey ?? 0;
+      final keyCompare = bKey.compareTo(aKey);
+      if (keyCompare != 0) return keyCompare;
+      final aLabel = a.sessionName ?? '';
+      final bLabel = b.sessionName ?? '';
+      return aLabel.compareTo(bLabel);
+    });
+    return sessions;
+  }
+
+  bool _matchesDrsFilter(CarTelemetryEntry entry) {
+    return switch (_drsFilter) {
+      CarDrsFilter.all => true,
+      CarDrsFilter.active => entry.isDrsActive,
+      CarDrsFilter.inactive => !entry.isDrsActive,
+    };
   }
 
   Widget _buildLoadingState() {
@@ -624,15 +824,82 @@ class _CarListScreenState extends State<CarListScreen> {
   }
 }
 
-bool _matchesQuery(CarTelemetryEntry entry, String query) {
-  final values = [
-    entry.driverNumber.toString(),
-    entry.meetingKey?.toString() ?? '',
-    entry.sessionKey?.toString() ?? '',
-    entry.sessionName?.toLowerCase() ?? '',
-    entry.drsLabel.toLowerCase(),
-  ];
-  return values.any((value) => value.toLowerCase().contains(query));
+double? _averageInt(Iterable<int?> values) {
+  var sum = 0;
+  var count = 0;
+  for (final value in values) {
+    if (value != null) {
+      sum += value;
+      count++;
+    }
+  }
+  if (count == 0) return null;
+  return sum / count;
+}
+
+class _CarSearchQuery {
+  _CarSearchQuery({
+    required this.sessionKeys,
+    required this.driverNumbers,
+    required this.text,
+  });
+
+  factory _CarSearchQuery.fromRaw(String raw) {
+    final normalized = raw.toLowerCase();
+    final sessionKeys = <int>{};
+    final driverNumbers = <int>{};
+    var remaining = normalized;
+
+    final tokenRegex = RegExp(r'(session|driver)#([0-9]+)');
+    for (final match in tokenRegex.allMatches(normalized)) {
+      final token = match.group(0);
+      final type = match.group(1);
+      final value = int.tryParse(match.group(2) ?? '');
+      if (value != null) {
+        if (type == 'session') {
+          sessionKeys.add(value);
+        } else if (type == 'driver') {
+          driverNumbers.add(value);
+        }
+      }
+      if (token != null) {
+        remaining = remaining.replaceFirst(token, ' ');
+      }
+    }
+
+    final cleaned = remaining.trim().replaceAll(RegExp(r'\s+'), ' ');
+    return _CarSearchQuery(
+      sessionKeys: sessionKeys,
+      driverNumbers: driverNumbers,
+      text: cleaned,
+    );
+  }
+
+  final Set<int> sessionKeys;
+  final Set<int> driverNumbers;
+  final String text;
+
+  bool matches(CarDriverSessionGroup group) {
+    if (sessionKeys.isNotEmpty) {
+      final sessionKey = group.sessionKey;
+      if (sessionKey == null || !sessionKeys.contains(sessionKey)) {
+        return false;
+      }
+    }
+    if (driverNumbers.isNotEmpty &&
+        !driverNumbers.contains(group.driverNumber)) {
+      return false;
+    }
+    if (text.isEmpty) return true;
+
+    final haystacks = <String>[
+      group.driverNumber.toString(),
+      group.sessionKey?.toString() ?? '',
+      group.sessionName ?? '',
+    ].map((value) => value.toLowerCase());
+
+    return haystacks.any((value) => value.contains(text));
+  }
 }
 
 String _formatTimestamp(DateTime date) {
