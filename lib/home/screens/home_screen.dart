@@ -227,8 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       } else {
-                        Navigator.of(context)
-                            .pushReplacementNamed(destination.route);
+                        Navigator.of(context).pushNamed(destination.route);
                       }
                     },
                     child: Container(

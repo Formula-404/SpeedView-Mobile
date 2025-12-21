@@ -64,20 +64,20 @@ class SpeedViewDrawer extends StatelessWidget {
 
                       // Routing khusus untuk modul yang sudah punya halaman sendiri
                       if (destination.route == AppRoutes.drivers) {
-                        Navigator.of(context).pushReplacement(
+                        Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const DriverListPage(),
                           ),
                         );
                       } else if (destination.route == AppRoutes.laps) {
-                        Navigator.of(context).pushReplacement(
+                        Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const LapsListPage(),
                           ),
                         );
                       } else if (destination.route == AppRoutes.pit ||
                           destination.route == AppRoutes.pitStops) {
-                        Navigator.of(context).pushReplacement(
+                        Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const PitListPage(),
                           ),
@@ -85,7 +85,7 @@ class SpeedViewDrawer extends StatelessWidget {
                       } else {
                         // sisanya tetap pakai named route seperti biasa
                         Navigator.of(context)
-                            .pushReplacementNamed(destination.route);
+                            .pushNamed(destination.route);
                       }
                     },
                   );

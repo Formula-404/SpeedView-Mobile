@@ -17,10 +17,11 @@ import 'circuit/screens/circuit_list_screen.dart';
 import 'team/screens/team_list_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const SpeedViewApp());
 }
 
-class SpeedViewApp extends StatelessWidget {
+class SpeedViewApp extends StatefulWidget {
   const SpeedViewApp({
     super.key,
     this.service,
@@ -36,24 +37,64 @@ class SpeedViewApp extends StatelessWidget {
   static const Color _surface = Color(0xFF0F151F);
 
   @override
+  State<SpeedViewApp> createState() => _SpeedViewAppState();
+}
+
+class _SpeedViewAppState extends State<SpeedViewApp> {
+  final CookieRequest _cookieRequest = CookieRequest();
+  late final Future<void> _initialization =
+      _cookieRequest.init().then((_) {});
+
+  @override
   Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _initialization,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              scaffoldBackgroundColor: SpeedViewApp._background,
+              colorScheme: const ColorScheme.dark(),
+            ),
+            home: const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
+        }
+
+        final initialRoute = _cookieRequest.loggedIn
+            ? AppRoutes.home
+            : widget.initialRoute;
+
+        return Provider<CookieRequest>.value(
+          value: _cookieRequest,
+          child: _buildApp(initialRoute),
+        );
+      },
+    );
+  }
+
+  Widget _buildApp(String initialRoute) {
     final colorScheme = ColorScheme.dark(
-      primary: _primaryRed,
-      secondary: _accentOrange,
-      surface: _surface,
+      primary: SpeedViewApp._primaryRed,
+      secondary: SpeedViewApp._accentOrange,
+      surface: SpeedViewApp._surface,
     );
 
     final placeholderRoutes = AppRoutes.placeholderDestinations
         .map((destination) => destination.route)
         .toSet();
 
-    final app = MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SpeedView Mobile',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: colorScheme,
-        scaffoldBackgroundColor: _background,
+        scaffoldBackgroundColor: SpeedViewApp._background,
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor: Colors.transparent,
@@ -73,7 +114,7 @@ class SpeedViewApp extends StatelessWidget {
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            backgroundColor: _primaryRed,
+            backgroundColor: SpeedViewApp._primaryRed,
             foregroundColor: Colors.white,
             padding:
                 const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
@@ -93,7 +134,7 @@ class SpeedViewApp extends StatelessWidget {
             const BottomNavigationShell(initialRoute: AppRoutes.comparison),
         AppRoutes.user: (_) =>
             const BottomNavigationShell(initialRoute: AppRoutes.user),
-        AppRoutes.meetings: (_) => MeetingListScreen(service: service),
+        AppRoutes.meetings: (_) => MeetingListScreen(service: widget.service),
         AppRoutes.sessions: (context) => const SessionListScreen(),
         AppRoutes.circuits: (context) => const CircuitListScreen(),
         AppRoutes.cars: (_) => const CarListScreen(),
@@ -112,11 +153,6 @@ class SpeedViewApp extends StatelessWidget {
         }
         return null;
       },
-    );
-
-    return Provider<CookieRequest>(
-      create: (_) => CookieRequest(),
-      child: app,
     );
   }
 }
