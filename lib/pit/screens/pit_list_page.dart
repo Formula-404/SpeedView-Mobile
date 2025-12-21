@@ -18,8 +18,7 @@ class PitListPage extends StatefulWidget {
 }
 
 class _PitListPageState extends State<PitListPage> {
-  static const String _baseUrl =
-      'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
+  static const String _baseUrl = 'https://helven-marcia-speedview.pbp.cs.ui.ac.id';
   static const int _pageSize = 20;
 
   final _sessionKeyController = TextEditingController();
@@ -27,11 +26,15 @@ class _PitListPageState extends State<PitListPage> {
   final _lapNumberController = TextEditingController();
   final _meetingKeyController = TextEditingController();
 
+  final ScrollController _scrollController = ScrollController();
+  static const double _scrollThresholdPx = 320;
+
   final List<PitStop> _pits = [];
 
   bool _isInitialLoading = false;
   bool _isMoreLoading = false;
   bool _hasMore = true;
+
   int _offset = 0;
   int _totalCount = 0;
   String? _error;
@@ -39,6 +42,9 @@ class _PitListPageState extends State<PitListPage> {
   @override
   void initState() {
     super.initState();
+
+    _scrollController.addListener(_onScroll);
+
     if (widget.initialDriverNumber != null) {
       _driverNumberController.text = widget.initialDriverNumber.toString();
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -49,11 +55,25 @@ class _PitListPageState extends State<PitListPage> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+
     _sessionKeyController.dispose();
     _driverNumberController.dispose();
     _lapNumberController.dispose();
     _meetingKeyController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    if (_isInitialLoading || _isMoreLoading) return;
+    if (!_hasMore) return;
+
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - _scrollThresholdPx) {
+      _loadPage(reset: false);
+    }
   }
 
   Map<String, String> _buildFilters() {
@@ -72,7 +92,8 @@ class _PitListPageState extends State<PitListPage> {
     return params;
   }
 
-  Future<void> _loadPage({bool reset = false}) async {
+  Future<void> _loadPage({required bool reset}) async {
+    // guard: cegah double request
     if (_isInitialLoading || _isMoreLoading) return;
     if (!reset && !_hasMore) return;
 
@@ -82,6 +103,7 @@ class _PitListPageState extends State<PitListPage> {
       setState(() {
         _error = null;
         _isInitialLoading = true;
+
         _pits.clear();
         _offset = 0;
         _totalCount = 0;
@@ -109,44 +131,54 @@ class _PitListPageState extends State<PitListPage> {
       final url = '$_baseUrl/pit/api/?$qs';
 
       final raw = await request.get(url);
-      if (raw is! Map<String, dynamic>) {
-        throw Exception('Invalid response from server');
+
+      if (raw is! Map) {
+        throw Exception('Invalid response from server (not a JSON object)');
       }
-      final response = raw;
+      final Map<String, dynamic> response = Map<String, dynamic>.from(raw);
 
       if (response['ok'] != true) {
         throw Exception(response['error'] ?? 'Failed to load pit data');
       }
 
-      final List<dynamic> rawData =
-          (response['data'] as List<dynamic>?) ?? <dynamic>[];
-      final List<PitStop> newPits = rawData
-          .map((e) => PitStop.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final dynamic dataRaw = response['data'];
+      final List<dynamic> rawData = (dataRaw is List) ? dataRaw : <dynamic>[];
 
+      final List<PitStop> newPits = rawData.map((e) {
+        if (e is Map) return PitStop.fromJson(Map<String, dynamic>.from(e));
+        throw Exception('Invalid pit item');
+      }).toList();
+
+      if (!mounted) return;
       setState(() {
+        // count bisa int atau string
         final dynamic c = response['count'];
         if (c != null) {
-          _totalCount =
-              c is int ? c : int.tryParse(c.toString()) ?? _totalCount;
+          _totalCount = c is int ? c : int.tryParse(c.toString()) ?? _totalCount;
         }
 
+        // append data
         _pits.addAll(newPits);
 
+        // next_offset bisa int/string/null
         final dynamic nextOffsetRaw = response['next_offset'];
         if (nextOffsetRaw != null) {
           _offset = nextOffsetRaw is int
               ? nextOffsetRaw
-              : int.tryParse(nextOffsetRaw.toString()) ??
-                  (_offset + newPits.length);
+              : int.tryParse(nextOffsetRaw.toString()) ?? (_offset + newPits.length);
         } else {
           _offset += newPits.length;
         }
 
         final bool serverHasMore = response['has_more'] == true;
+        // safety: kalau server bilang has_more tapi page kosong, stop supaya tidak loop
         _hasMore = serverHasMore && newPits.isNotEmpty;
       });
+
+      // Jika item sedikit dan belum bisa scroll, prefetch 1 halaman lagi (opsional tapi membantu “stuck loading”)
+      _maybePrefetchIfNotScrollable();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _hasMore = false;
@@ -160,11 +192,27 @@ class _PitListPageState extends State<PitListPage> {
     }
   }
 
+  void _maybePrefetchIfNotScrollable() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_scrollController.hasClients) return;
+      if (_isInitialLoading || _isMoreLoading) return;
+      if (!_hasMore) return;
+
+      // kalau maxScrollExtent == 0 artinya list belum cukup panjang untuk discroll
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      if (maxScroll <= 0) {
+        _loadPage(reset: false);
+      }
+    });
+  }
+
   void _clear() {
     _sessionKeyController.clear();
     _driverNumberController.clear();
     _lapNumberController.clear();
     _meetingKeyController.clear();
+
     setState(() {
       _pits.clear();
       _error = null;
@@ -176,40 +224,46 @@ class _PitListPageState extends State<PitListPage> {
     });
   }
 
+  Future<void> _refresh() async {
+    await _loadPage(reset: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF161B22),
       drawer: const SpeedViewDrawer(currentRoute: AppRoutes.pitStops),
       appBar: const SpeedViewAppBar(title: 'Pit Stops'),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildBackRow(context),
-            const SizedBox(height: 18),
-            _buildMetric(),
-            const SizedBox(height: 16),
-            _buildFilterCard(),
-            const SizedBox(height: 12),
-            _buildMetaText(),
-            const SizedBox(height: 8),
-            Expanded(
-              child: _isInitialLoading && _pits.isEmpty
-                  ? const Center(
-                      child: CircularProgressIndicator(color: Colors.red),
-                    )
-                  : _pits.isEmpty && _error == null
-                      ? const Center(
-                          child: Text(
-                            'No data. Set filter lalu tekan Load.',
-                            style: TextStyle(color: Color(0xFFE6EDF3)),
-                          ),
-                        )
-                      : _buildListView(),
-            ),
-          ],
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildBackRow(context),
+              const SizedBox(height: 18),
+              _buildMetric(),
+              const SizedBox(height: 16),
+              _buildFilterCard(),
+              const SizedBox(height: 12),
+              _buildMetaText(),
+              const SizedBox(height: 8),
+              Expanded(
+                child: _isInitialLoading && _pits.isEmpty
+                    ? const Center(child: CircularProgressIndicator(color: Colors.red))
+                    : _pits.isEmpty && _error == null
+                        ? const Center(
+                            child: Text(
+                              'No data. Tekan Load untuk memuat data.',
+                              style: TextStyle(color: Color(0xFFE6EDF3)),
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : _buildListView(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -218,8 +272,7 @@ class _PitListPageState extends State<PitListPage> {
   Widget _buildBackRow(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(999),
-      onTap: () =>
-          Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+      onTap: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -272,15 +325,11 @@ class _PitListPageState extends State<PitListPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.ev_station_outlined,
-              color: Colors.redAccent, size: 18),
+          const Icon(Icons.ev_station_outlined, color: Colors.redAccent, size: 18),
           const SizedBox(width: 8),
           Text(
             text,
-            style: const TextStyle(
-              color: Color(0xFFE6EDF3),
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: Color(0xFFE6EDF3), fontSize: 13),
           ),
         ],
       ),
@@ -321,14 +370,11 @@ class _PitListPageState extends State<PitListPage> {
               SizedBox(
                 width: 120,
                 child: ElevatedButton(
-                  onPressed:
-                      _isInitialLoading ? null : () => _loadPage(reset: true),
+                  onPressed: _isInitialLoading ? null : () => _loadPage(reset: true),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red[700],
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isInitialLoading
                       ? const SizedBox(
@@ -346,9 +392,7 @@ class _PitListPageState extends State<PitListPage> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
                     side: const BorderSide(color: Colors.white24),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: const Text('Clear'),
                 ),
@@ -369,8 +413,9 @@ class _PitListPageState extends State<PitListPage> {
     }
 
     if (_totalCount > 0) {
+      final hint = _hasMore ? 'Scroll ke bawah untuk memuat 20 data berikutnya.' : 'Semua data sudah dimuat.';
       return Text(
-        '${_pits.length} dari $_totalCount item(s). Scroll ke bawah untuk memuat 20 data berikutnya.',
+        '${_pits.length} dari $_totalCount item(s). $hint',
         style: const TextStyle(color: Colors.white60, fontSize: 12),
       );
     }
@@ -402,8 +447,7 @@ class _PitListPageState extends State<PitListPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide:
-                const BorderSide(color: Colors.redAccent, width: 1.5),
+            borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
           ),
         ),
       ),
@@ -412,18 +456,45 @@ class _PitListPageState extends State<PitListPage> {
 
   Widget _buildListView() {
     return ListView.builder(
-      itemCount: _pits.length + (_hasMore ? 1 : 0),
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: _pits.length + 1, // +1 untuk footer (loader / end / error)
       itemBuilder: (context, index) {
         if (index == _pits.length) {
-          if (!_isMoreLoading && _hasMore) {
-            _loadPage(reset: false);
+          if (_error != null) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(
+                  'Stopped: $_error',
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
           }
+
+          if (!_hasMore) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              child: Center(
+                child: Text(
+                  'No more data.',
+                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                ),
+              ),
+            );
+          }
+
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 18),
             child: Center(
               child: _isMoreLoading
                   ? const CircularProgressIndicator(color: Colors.redAccent)
-                  : const SizedBox.shrink(),
+                  : const Text(
+                      'Scroll to load more…',
+                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
             ),
           );
         }
@@ -449,17 +520,13 @@ class _PitListPageState extends State<PitListPage> {
         children: [
           Text(
             pit.dateStr ?? '—',
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
           ),
           const SizedBox(height: 4),
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.redAccent.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(8),
@@ -476,8 +543,7 @@ class _PitListPageState extends State<PitListPage> {
               const SizedBox(width: 8),
               Text(
                 'Lap ${pit.lapNumber ?? '-'}',
-                style:
-                    const TextStyle(color: Colors.white70, fontSize: 13),
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
               const Spacer(),
               Text(
