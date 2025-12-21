@@ -187,12 +187,16 @@ Hak akses pengguna disinkronkan antara backend dan aplikasi mobile. Setiap opera
 
 ## Desain Antarmuka (Figma)
 
+Lihat project figma melalui tautan berikut:
+
 <p align="left">
   <a href="https://www.figma.com/files/team/1555462377026209078/project/463049743/SpeedView?fuid=1485588854028450044">
     <img src="https://img.shields.io/badge/Figma-Desain%20Antarmuka-purple?style=for-the-badge&logo=figma&logoColor=white" alt="Figma"/>
   </a>
 </p>
-Link alternatif:
+
+Link file alternatif:
+
 <p align="left">
   <a href="https://www.figma.com/design/hJGXw1ko660dWMX8qjTOzV/SpeedViewMobile?node-id=23-404&t=YH8FV1l7583KxjCO-1">
     <img src="https://img.shields.io/badge/Figma-Desain%20Antarmuka-purple?style=for-the-badge&logo=figma&logoColor=white" alt="Figma"/>
@@ -208,5 +212,17 @@ Unduh aplikasi versi terbaru melalui tautan berikut:
 <p align="left">
   <a href="https://app.bitrise.io/app/01e70d89-e788-4193-b052-607f36aca7e6/installable-artifacts/9b8a234e4528d957/public-install-page/54e593c012ff512998a3511c027f58b1">
     <img src="https://img.shields.io/badge/Android-SpeedView-androidgreen?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
+  </a>
+</p>
+
+---
+
+## Video Promosi
+
+Lihat video promosi aplikasi SpeedView melalui tautan berikut:
+
+<p align="left">
+  <a href="https://youtu.be/bC-Zp8JLXtU">
+    <img src="https://img.shields.io/badge/Youtube-SpeedView-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Youtube"/>
   </a>
 </p>
