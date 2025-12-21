@@ -32,7 +32,6 @@ class CircuitCard extends StatelessWidget {
           children: [
             // MAP
             Expanded(
-              flex: 3,
               child: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.all(12),
@@ -49,78 +48,76 @@ class CircuitCard extends StatelessWidget {
             ),
             
             // informasi & tombol
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      circuit.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8), 
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, 
+                children: [
+                  Text(
+                    circuit.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      circuit.country,
-                      style: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 11,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    circuit.country,
+                    style: const TextStyle(
+                      color: Colors.white60,
+                      fontSize: 11,
                     ),
-                    
-                    const Spacer(),
-
-                    // tombol admin
-                    if (circuit.isAdmin) 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          // Edit Button
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: onEdit,
-                              borderRadius: BorderRadius.circular(4),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.yellow.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Icon(Icons.edit, size: 16, color: Colors.yellowAccent),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  
+                  // tombol admin
+                  if (circuit.isAdmin) ...[
+                    const SizedBox(height: 8), 
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Edit Button
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: onEdit,
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.yellow.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
                               ),
+                              child: const Icon(Icons.edit, size: 16, color: Colors.yellowAccent),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          // Delete Button
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: onDelete,
-                              borderRadius: BorderRadius.circular(4),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                        ),
+                        const SizedBox(width: 8),
+                        // Delete Button
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: onDelete,
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
                               ),
+                              child: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
                             ),
                           ),
-                        ],
-                      )
-                  ],
-                ),
+                        ),
+                      ],
+                    )
+                  ]
+                ],
               ),
             ),
           ],
