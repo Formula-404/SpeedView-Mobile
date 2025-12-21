@@ -331,7 +331,7 @@ class _CarListScreenState extends State<CarListScreen> {
             controller: _sessionKeyController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Session key (optional)',
+              labelText: 'Session key (optional, default: Race)',
               hintText: 'e.g. 9493',
               filled: true,
               fillColor: Color(0xFF0F151E),
@@ -403,7 +403,7 @@ class _CarListScreenState extends State<CarListScreen> {
         controller: _searchController,
         decoration: const InputDecoration(
           icon: Icon(Icons.search, color: Colors.white70),
-          hintText: 'Use session#9493 or driver#44 to filter results...',
+          hintText: 'Use driver#44 to filter results...',
           border: InputBorder.none,
         ),
       ),
