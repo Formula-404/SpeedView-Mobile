@@ -200,7 +200,7 @@ Hak akses pengguna disinkronkan antara backend dan aplikasi mobile. Setiap opera
 Unduh aplikasi versi terbaru melalui tautan berikut:
 
 <p align="left">
-  <a href="https://app.bitrise.io/app/01e70d89-e788-4193-b052-607f36aca7e6/installable-artifacts/71a1caac74c509b8/public-install-page/1a50aa322b74036656b7c0963b38922a">
+  <a href="https://app.bitrise.io/app/01e70d89-e788-4193-b052-607f36aca7e6/installable-artifacts/9b8a234e4528d957/public-install-page/54e593c012ff512998a3511c027f58b1">
     <img src="https://img.shields.io/badge/Android-SpeedView-androidgreen?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
   </a>
 </p>
